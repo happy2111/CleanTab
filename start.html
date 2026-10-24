@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New Tab</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <!-- Подключение шрифта Tektur из Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tektur:wght@400..900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #000000;
+            --text-color: #ffffff;
+        }
+
+        html {
+            background-color: var(--bg-color);
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            font-family: "Tektur", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 500;
+            font-style: normal;
+            overflow: hidden;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        /* Основная рабочая область (сдвигается при открытии боковой панели) */
+        .main-content {
+            flex: 1;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+            transition: margin-right 0.24s cubic-bezier(0.16, 1, 0.3, 1), margin-left 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+        body.sidebar-open .main-content {
+            margin-right: 360px;
+            margin-left: 0;
+        }
+        body.sidebar-open.sidebar-pos-left .main-content {
+            margin-left: 360px;
+            margin-right: 0;
+        }
+        body.no-sidebar-transition .main-content {
+            transition: none !important;
+        }
+
+        /* Блок верхних кнопок (при панели справа кнопки слева, при панели слева кнопки справа) */
+        .top-actions {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: auto;
+            padding: 20px 24px;
+            display: flex;
+            gap: 8px;
+            z-index: 50;
+        }
+        body.sidebar-pos-left .top-actions {
+            left: auto;
+            right: 0;
+        }
+        .action-btn,
+        .idea-icon-btn {
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            outline: none;
+            box-shadow: none;
+            padding: 0;
+            cursor: pointer;
+            position: relative;
+            color: rgba(255, 255, 255, 0.45);
+            color: color-mix(in srgb, var(--text-color, #ffffff) 45%, transparent);
+            transition: color 0.2s ease, opacity 0.2s ease;
+        }
+        .action-btn {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .top-actions:hover .action-btn {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .action-btn:hover,
+        .idea-icon-btn:hover {
+            background: transparent;
+            color: var(--text-color, #ffffff);
+        }
+        .action-btn.active,
+        .idea-icon-btn.active {
+            background: transparent;
+            color: var(--text-color, #ffffff);
+        }
+        .action-btn svg,
+        .idea-icon-btn svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: stroke 0.2s ease, fill 0.2s ease;
+        }
+        .idea-icon-btn.active svg,
+        .action-btn.active svg {
+            fill: currentColor;
+        }
+
+        #search-form {
+            width: 100%;
+            max-width: 600px;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        .input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        /* Общие правила типографики для поля ввода, автозаполнения и зеркала */
+        #search-input,
+        #caret-mirror,
+        #ghost-text {
+            font-family: "Tektur", sans-serif;
+            font-size: 28px;
+            font-weight: 500;
+            font-optical-sizing: auto;
+            line-height: 1.35;
+            letter-spacing: normal;
+            padding: 16px 12px;
+            box-sizing: border-box;
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        #search-input {
+            width: 100%;
+            background-color: transparent;
+            border: none;
+            border-radius: 0;
+            color: var(--text-color);
+            outline: none;
+            resize: none;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            caret-color: transparent !important;
+            position: relative;
+            z-index: 2;
+            display: block;
+            min-height: 70px;
+            max-height: 240px;
+            height: 70px;
+        }
+        #search-input::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            height: 0;
+        }
+        #search-input::placeholder {
+            color: #555555;
+        }
+
+        /* Невидимое зеркало для точного 2D-позиционирования курсора на любой строке */
+        #caret-mirror {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            visibility: hidden;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        /* Текст автозаполнения (подсказка из истории или переменных) */
+        #ghost-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1;
+        }
+        #ghost-typed {
+            visibility: hidden;
+        }
+        #ghost-suffix {
+            color: #555555;
+        }
+
+        /* Кастомный толстый нижний горизонтальный курсор */
+        #custom-caret {
+            position: absolute;
+            height: 5px;
+            background-color: var(--text-color);
+            pointer-events: none;
+            z-index: 10;
+            border-radius: 1px;
+            display: none;
+            animation: caret-blink 0.8s infinite;
+        }
+
+        @keyframes caret-blink {
+            0%, 49% {
+                opacity: 1;
+            }
+            50%, 100% {
+                opacity: 0;
+            }
+        }
+
+        /* Невидимые элементы для вычисления позиции символов */
+        .text-measure {
+            position: absolute;
+            visibility: hidden;
+            white-space: pre;
+            pointer-events: none;
+            top: -9999px;
+            left: -9999px;
+            font-family: "Tektur", sans-serif;
+            font-size: 28px;
+            font-weight: 500;
+            font-optical-sizing: auto;
+        }
+
+        /* Модальное окно настроек (современный минималистичный дизайн без лишних рамок) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.24s;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        .modal-container {
+            width: 94%;
+            max-width: 680px;
+            height: 500px;
+            max-height: 85vh;
+            background: rgba(18, 18, 20, 0.88);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: row;
+            box-sizing: border-box;
+            overflow: hidden;
+            transform: scale(0.96) translateY(12px);
+            opacity: 0;
+            transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.24s ease;
+        }
+        .modal-overlay.active .modal-container {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+        .modal-sidebar {
+            width: 190px;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 18px 12px 14px 14px;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            border: none;
+            box-sizing: border-box;
+            user-select: none;
+        }
+        .modal-sidebar-header {
+            padding: 2px 10px 14px 8px;
+        }
+        .modal-sidebar-title {
+            font-size: 13.5px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            color: rgba(255, 255, 255, 0.85);
+        }
+        .modal-sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: none;
+        }
+        .modal-sidebar-nav::-webkit-scrollbar {
+            display: none;
+        }
+        .modal-tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 8px 12px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.45);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.18s ease, color 0.18s ease;
+            outline: none;
+            box-sizing: border-box;
+            text-align: left;
+            white-space: nowrap;
+        }
+        .modal-tab-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-color, #ffffff);
+        }
+        .modal-tab-btn.active {
+            background: rgba(255, 255, 255, 0.09);
+            color: var(--text-color, #ffffff);
+            font-weight: 600;
+        }
+        .modal-tab-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            flex-shrink: 0;
+            opacity: 0.75;
+            transition: opacity 0.18s ease;
+        }
+        .modal-tab-btn.active svg {
+            opacity: 1;
+        }
+        .modal-tab-btn .tab-label {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .modal-sidebar-footer {
+            padding: 8px 10px 0 10px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .nav-key-hint {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.04);
+            padding: 2px 7px;
+            border-radius: 4px;
+            letter-spacing: 0.4px;
+            font-weight: 500;
+        }
+        .modal-main-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            box-sizing: border-box;
+            background: transparent;
+        }
+        .modal-content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px 10px 22px;
+            flex-shrink: 0;
+            border: none;
+        }
+        .modal-content-title {
+            font-size: 14.5px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .modal-close-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.45);
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: color 0.18s ease;
+            outline: none;
+            padding: 0;
+            flex-shrink: 0;
+        }
+        .modal-close-btn:hover {
+            background: transparent;
+            color: var(--text-color, #ffffff);
+        }
+        .modal-close-btn svg {
+            width: 17px;
+            height: 17px;
+            stroke: currentColor;
+        }
+        .modal-body {
+            padding: 6px 22px 20px 22px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            height: calc(100% - 58px);
+        }
+        @keyframes tabContentIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .tab-content {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            box-sizing: border-box;
+        }
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+            animation: tabContentIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Вкладка истории */
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+        .history-count {
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 13px;
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: rgba(255, 255, 255, 0.65);
+            font-family: inherit;
+            font-size: 12.5px;
+            padding: 6px 14px;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: background 0.18s ease, color 0.18s ease;
+            outline: none;
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.11);
+            color: var(--text-color, #ffffff);
+        }
+        .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            width: 100%;
+            box-sizing: border-box;
+            padding-right: 4px;
+        }
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: none;
+            border-radius: 8px;
+            font-size: 13.5px;
+            color: rgba(255, 255, 255, 0.85);
+            transition: background 0.18s ease, color 0.18s ease;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        .list-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-color, #ffffff);
+        }
+        .item-text {
+            word-break: break-all;
+            flex: 1;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+        .item-text:hover {
+            color: var(--text-color, #ffffff);
+        }
+        .item-delete-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.35);
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 6px;
+            transition: color 0.18s ease;
+            outline: none;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .item-delete-btn:hover {
+            color: #ff5555;
+        }
+        .item-delete-btn svg {
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+        }
+        .empty-state {
+            color: rgba(255, 255, 255, 0.35);
+            text-align: center;
+            padding: 50px 0;
+            font-size: 13.5px;
+        }
+
+        /* Вкладка переменных (алиасов) */
+        .alias-form {
+            display: flex;
+            gap: 8px;
+            margin: 0 0 14px 0;
+            padding: 0;
+            width: 100%;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+        .modal-input {
+            height: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            border-radius: 8px;
+            padding: 0 14px;
+            font-size: 13px;
+            color: var(--text-color, #ffffff);
+            font-family: inherit;
+            outline: none;
+            transition: background 0.18s ease, box-shadow 0.18s ease;
+            box-sizing: border-box;
+        }
+        .modal-input:focus {
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.2);
+        }
+        .modal-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+        .alias-key-input {
+            width: 32%;
+            flex-shrink: 0;
+        }
+        .alias-url-input {
+            flex: 1;
+            min-width: 0;
+        }
+        .btn-primary {
+            height: 40px;
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--text-color, #ffffff);
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 0 18px;
+            cursor: pointer;
+            transition: background 0.18s ease, color 0.18s ease;
+            white-space: nowrap;
+            outline: none;
+            flex-shrink: 0;
+            box-sizing: border-box;
+        }
+        .btn-primary:hover {
+            background: var(--text-color, #ffffff);
+            color: var(--bg-color, #000000);
+        }
+        .alias-badge {
+            color: var(--text-color, #ffffff);
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 3px 8px;
+            border-radius: 6px;
+            margin-right: 10px;
+            font-size: 12.5px;
+            border: none;
+            flex-shrink: 0;
+        }
+        .alias-arrow {
+            color: rgba(255, 255, 255, 0.35);
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        .alias-target {
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 13px;
+            word-break: break-all;
+        }
+
+        /* Вкладка цветов и темы */
+        .theme-section {
+            margin-bottom: 22px;
+            flex-shrink: 0;
+        }
+        .theme-label {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12.5px;
+            margin-bottom: 12px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+        .color-presets {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .color-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+            outline: none;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .color-circle:hover {
+            transform: scale(1.15);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        .color-circle.active {
+            border-color: var(--text-color, #ffffff);
+            transform: scale(1.12);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
+        }
+        .custom-color-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            padding: 5px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.18s ease;
+        }
+        .custom-color-wrap:hover {
+            background: rgba(255, 255, 255, 0.09);
+        }
+        .custom-color-wrap input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            background: none;
+            padding: 0;
+        }
+        .custom-color-wrap input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        .custom-color-wrap input[type="color"]::-webkit-color-swatch {
+            border: 1.5px solid rgba(255, 255, 255, 0.25);
+            border-radius: 50%;
+        }
+        .custom-color-wrap span {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Выбор расположения боковой панели */
+        .pos-options {
+            display: inline-flex;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 3px;
+            border-radius: 10px;
+        }
+        .pos-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 7px 16px;
+            cursor: pointer;
+            border-radius: 7px;
+            transition: color 0.18s ease, background 0.18s ease;
+            outline: none;
+        }
+        .pos-btn:hover:not(.active) {
+            color: var(--text-color, #ffffff);
+        }
+        .pos-btn.active {
+            color: var(--text-color, #ffffff);
+            background: rgba(255, 255, 255, 0.12);
+        }
+        .pos-btn svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
+        }
+
+        /* Вкладка языков */
+        .lang-options {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            width: 100%;
+            box-sizing: border-box;
+            padding-right: 4px;
+            margin-top: 6px;
+        }
+        .lang-card {
+            display: flex;
+            align-items: center;
+            padding: 11px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.65);
+            font-family: inherit;
+            transition: background 0.18s ease, color 0.18s ease;
+            outline: none;
+            box-sizing: border-box;
+            width: 100%;
+            flex-shrink: 0;
+        }
+        .lang-card:hover {
+            background: rgba(255, 255, 255, 0.07);
+            color: var(--text-color, #ffffff);
+        }
+        .lang-card.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color, #ffffff);
+        }
+        .lang-code {
+            font-weight: 600;
+            font-size: 11.5px;
+            color: rgba(255, 255, 255, 0.45);
+            background: rgba(255, 255, 255, 0.06);
+            padding: 3px 8px;
+            border-radius: 6px;
+            margin-right: 14px;
+            letter-spacing: 0.5px;
+        }
+        .lang-card.active .lang-code {
+            background: rgba(255, 255, 255, 0.18);
+            color: var(--text-color, #ffffff);
+        }
+        .lang-name {
+            font-size: 14px;
+            font-weight: 500;
+            flex: 1;
+            text-align: left;
+        }
+        .lang-check {
+            display: none;
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            color: var(--text-color, #ffffff);
+        }
+        .lang-card.active .lang-check {
+            display: block;
+        }
+
+        /* Вкладка горячих клавиш (Shortcuts) */
+        .shortcuts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            width: 100%;
+            box-sizing: border-box;
+            padding-right: 4px;
+        }
+        .shortcut-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: none;
+            border-radius: 8px;
+            font-size: 13.5px;
+            color: rgba(255, 255, 255, 0.85);
+            transition: background 0.18s ease;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        .shortcut-row:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .shortcut-name {
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+            margin-right: 12px;
+        }
+        .shortcut-badge {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-color, #ffffff);
+            cursor: pointer;
+            transition: background 0.18s ease, color 0.18s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            outline: none;
+            min-width: 68px;
+            letter-spacing: 0.3px;
+        }
+        .shortcut-badge:hover:not(.fixed) {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .shortcut-badge.recording {
+            background: rgba(0, 240, 255, 0.2);
+            color: #00f0ff;
+            animation: shortcutPulse 1s infinite alternate;
+        }
+        .shortcut-badge.empty {
+            color: rgba(255, 255, 255, 0.35);
+            font-weight: 400;
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .shortcut-badge.fixed {
+            cursor: default;
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.55);
+        }
+        @keyframes shortcutPulse {
+            from { opacity: 1; }
+            to { opacity: 0.5; }
+        }
+
+        /* Чекбокс подсказок горячих клавиш */
+        .shortcut-hints-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            user-select: none;
+            transition: background 0.18s ease;
+            flex-shrink: 0;
+            border: none;
+        }
+        .shortcut-hints-row:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .shortcut-hints-row input {
+            display: none;
+        }
+        .custom-chk {
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.08);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.18s ease;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .shortcut-hints-row input:checked + .custom-chk {
+            background: var(--text-color, #ffffff);
+        }
+        .custom-chk::after {
+            content: '';
+            width: 4px;
+            height: 8px;
+            border: solid #000000;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg) translate(-0.5px, -1px);
+            display: none;
+        }
+        .shortcut-hints-row input:checked + .custom-chk::after {
+            display: block;
+        }
+        .shortcut-hints-label {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 500;
+        }
+
+        /* Бейджи подсказок клавиш на кнопках интерфейса */
+        .btn-shortcut-hint {
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 8.5px;
+            font-weight: 600;
+            font-family: inherit;
+            line-height: 1.1;
+            padding: 2px 4.5px;
+            border-radius: 4px;
+            background: rgba(14, 14, 18, 0.94);
+            color: var(--text-color, #ffffff);
+            opacity: 0.85;
+            pointer-events: none;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 10;
+        }
+
+        /* Вкладка поисковой системы */
+        .engine-options {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            width: 100%;
+            box-sizing: border-box;
+            padding-right: 4px;
+        }
+        .engine-card {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+            font-family: inherit;
+            transition: background 0.18s ease, color 0.18s ease;
+            outline: none;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        .engine-card:hover {
+            background: rgba(255, 255, 255, 0.07);
+            color: var(--text-color, #ffffff);
+        }
+        .engine-card.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color, #ffffff);
+        }
+        .engine-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            flex: 1;
+        }
+        .engine-name {
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+        .engine-domain {
+            font-size: 11.5px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 2px;
+        }
+        .engine-card.active .engine-domain {
+            color: rgba(255, 255, 255, 0.65);
+        }
+        .engine-check {
+            display: none;
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            color: var(--text-color, #ffffff);
+        }
+        .engine-card.active .engine-check {
+            display: block;
+        }
+
+        /* Стилизация скроллбара */
+        .items-list::-webkit-scrollbar,
+        .shortcuts-list::-webkit-scrollbar,
+        .engine-options::-webkit-scrollbar,
+        .lang-options::-webkit-scrollbar,
+        .modal-body::-webkit-scrollbar {
+            width: 5px;
+        }
+        .items-list::-webkit-scrollbar-thumb,
+        .shortcuts-list::-webkit-scrollbar-thumb,
+        .engine-options::-webkit-scrollbar-thumb,
+        .lang-options::-webkit-scrollbar-thumb,
+        .modal-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 3px;
+        }
+        .items-list::-webkit-scrollbar-thumb:hover,
+        .shortcuts-list::-webkit-scrollbar-thumb:hover,
+        .engine-options::-webkit-scrollbar-thumb:hover,
+        .lang-options::-webkit-scrollbar-thumb:hover,
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.22);
+        }
+        .items-list::-webkit-scrollbar-track,
+        .shortcuts-list::-webkit-scrollbar-track,
+        .engine-options::-webkit-scrollbar-track,
+        .lang-options::-webkit-scrollbar-track,
+        .modal-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* Кастомный стиль состояния фокуса для элементов в настройках */
+        .modal-container *:focus {
+            outline: none;
+        }
+        .modal-tab-btn:focus-visible {
+            box-shadow: 0 0 0 2px var(--text-color, #ffffff);
+            background: rgba(255, 255, 255, 0.12);
+        }
+        .engine-card:focus-visible {
+            box-shadow: 0 0 0 2px var(--text-color, #ffffff), 0 0 12px rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.12);
+        }
+        .lang-card:focus-visible {
+            box-shadow: 0 0 0 2px var(--text-color, #ffffff), 0 0 12px rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.12);
+        }
+        .shortcut-badge:focus-visible {
+            box-shadow: 0 0 0 2px var(--text-color, #ffffff), 0 0 10px rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.18);
+        }
+        .shortcut-hints-row:focus-within {
+            box-shadow: 0 0 0 2px var(--text-color, #ffffff);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .color-circle:focus-visible {
+            box-shadow: 0 0 0 2px var(--text-color, #ffffff), 0 0 12px rgba(255, 255, 255, 0.35);
+            transform: scale(1.15);
+        }
+        .pos-btn:focus-visible {
+            box-shadow: 0 0 0 2px var(--text-color, #ffffff);
+            background: rgba(255, 255, 255, 0.12);
+        }
+        .btn-secondary:focus-visible,
+        .btn-primary:focus-visible {
+            box-shadow: 0 0 0 2px var(--text-color, #ffffff);
+        }
+        .modal-close-btn:focus-visible {
+            box-shadow: 0 0 0 2px var(--text-color, #ffffff);
+            color: var(--text-color, #ffffff);
+        }
+
+        /* ==========================================
+           Modern Transparent Sidebar (Bookmarks & Tabs)
+           ========================================== */
+        .sidebar-trigger {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: auto;
+            width: 14px;
+            height: 100vh;
+            z-index: 85;
+            background: transparent;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .sidebar-trigger:hover {
+            background: linear-gradient(to left, rgba(255, 255, 255, 0.15), transparent);
+        }
+        body.sidebar-pos-left .sidebar-trigger {
+            left: 0;
+            right: auto;
+        }
+        body.sidebar-pos-left .sidebar-trigger:hover {
+            background: linear-gradient(to right, rgba(255, 255, 255, 0.15), transparent);
+        }
+        body.sidebar-open .sidebar-trigger {
+            display: none;
+        }
+
+        .idea-sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: auto;
+            width: 360px;
+            height: 100vh;
+            background-color: var(--bg-color);
+            border: none;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            z-index: 90;
+            transform: translateX(100%);
+            transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease, color 0.25s ease;
+            box-shadow: none;
+            user-select: none;
+            color: var(--text-color, #ffffff);
+            font-family: "Tektur", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 13.5px;
+        }
+        body.sidebar-pos-left .idea-sidebar {
+            right: auto;
+            left: 0;
+            transform: translateX(-100%);
+        }
+        .idea-sidebar.open {
+            transform: translateX(0);
+            border: none;
+            box-shadow: none;
+        }
+        body.sidebar-pos-left .idea-sidebar.open {
+            transform: translateX(0);
+        }
+        .idea-sidebar.no-transition {
+            transition: none !important;
+        }
+        .idea-sidebar.pinned {
+            border: none;
+            box-shadow: none;
+        }
+
+        /* Шапка боковой панели */
+        .idea-sidebar-header {
+            padding: 16px 20px 8px 20px;
+            border: none;
+            background: transparent;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        .idea-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Контейнер списков/дерева */
+        .idea-sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 6px 0 12px 0;
+            box-sizing: border-box;
+        }
+        .idea-sidebar-content::-webkit-scrollbar {
+            width: 5px;
+        }
+        .idea-sidebar-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 3px;
+        }
+        .idea-sidebar-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        .idea-sidebar-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* Дерево закладок */
+        .idea-tree-row {
+            display: flex;
+            align-items: center;
+            height: 36px;
+            padding-right: 10px;
+            box-sizing: border-box;
+            cursor: pointer;
+            border-radius: 8px;
+            margin: 2px 6px;
+            color: rgba(255, 255, 255, 0.88);
+            transition: background 0.15s ease, color 0.15s ease;
+            position: relative;
+            user-select: none;
+        }
+        .idea-tree-row:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+        }
+        .idea-tree-row:active {
+            background: rgba(255, 255, 255, 0.14);
+        }
+        .idea-tree-arrow {
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.5);
+            flex-shrink: 0;
+            margin-right: 4px;
+            transition: transform 0.18s ease;
+        }
+        .idea-tree-arrow.expanded {
+            transform: rotate(90deg);
+        }
+        .idea-tree-arrow.hidden {
+            visibility: hidden;
+        }
+        .idea-tree-arrow svg {
+            width: 11px;
+            height: 11px;
+            stroke-width: 2.5;
+        }
+        .idea-tree-icon {
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        .idea-tree-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+        .idea-folder-icon {
+            color: var(--text-color, #ffffff);
+            opacity: 0.9;
+        }
+        .idea-favicon {
+            width: 22px;
+            height: 22px;
+            border-radius: 5px;
+            object-fit: contain;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 2px;
+            box-sizing: border-box;
+        }
+        .idea-tree-title {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 13.5px;
+            line-height: 36px;
+            font-weight: 500;
+        }
+        .idea-tree-title mark {
+            background: rgba(255, 255, 255, 0.25);
+            color: #ffffff;
+            border-radius: 3px;
+            padding: 0 2px;
+        }
+        .idea-tree-count {
+            font-size: 11.5px;
+            color: rgba(255, 255, 255, 0.45);
+            margin-left: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1px 7px;
+            border-radius: 10px;
+            flex-shrink: 0;
+        }
+        .idea-tree-domain {
+            font-size: 11.5px;
+            color: rgba(255, 255, 255, 0.38);
+            margin-left: 10px;
+            margin-right: 4px;
+            max-width: 100px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 0;
+        }
+        .idea-tree-actions {
+            display: none;
+            align-items: center;
+            gap: 3px;
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+        .idea-tree-row:hover .idea-tree-actions {
+            display: flex;
+        }
+        .idea-tree-btn {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: rgba(255, 255, 255, 0.45);
+            color: color-mix(in srgb, var(--text-color, #ffffff) 45%, transparent);
+            cursor: pointer;
+            padding: 0;
+            transition: color 0.15s ease;
+        }
+        .idea-tree-btn:hover {
+            background: transparent;
+            color: var(--text-color, #ffffff);
+        }
+        .idea-tree-btn.btn-delete:hover {
+            background: transparent;
+            color: #ff6b6b;
+        }
+        .idea-tree-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .idea-tree-children {
+            display: block;
+        }
+        .idea-tree-children.collapsed {
+            display: none;
+        }
+
+        /* Пустые состояния */
+        .idea-empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 20px;
+            color: rgba(255, 255, 255, 0.4);
+            text-align: center;
+            gap: 10px;
+        }
+        .idea-empty-icon {
+            width: 36px;
+            height: 36px;
+            color: rgba(255, 255, 255, 0.3);
+        }
+        .idea-empty-text {
+            font-size: 13.5px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Правая зона активации боковой панели при наведении -->
+    <div id="sidebar-trigger" class="sidebar-trigger" title="Hover to open Bookmarks"></div>
+
+    <!-- Боковая панель закладок (справа, без рамок) -->
+    <aside id="idea-sidebar" class="idea-sidebar" aria-label="Bookmarks sidebar">
+        <div class="idea-sidebar-header">
+            <div class="idea-header-actions">
+                <!-- Свернуть все -->
+                <button id="idea-btn-collapse" class="idea-icon-btn" type="button" title="Collapse all">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="4 14 10 14 10 20"></polyline>
+                        <polyline points="20 10 14 10 14 4"></polyline>
+                        <line x1="14" y1="10" x2="21" y2="3"></line>
+                        <line x1="3" y1="21" x2="10" y2="14"></line>
+                    </svg>
+                </button>
+                <!-- Развернуть все -->
+                <button id="idea-btn-expand" class="idea-icon-btn" type="button" title="Expand all">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <polyline points="9 21 3 21 3 15"></polyline>
+                        <line x1="21" y1="3" x2="14" y2="10"></line>
+                        <line x1="3" y1="21" x2="10" y2="14"></line>
+                    </svg>
+                </button>
+                <!-- Закрепить панель (Pin) -->
+                <button id="idea-btn-pin" class="idea-icon-btn" type="button" title="Pin sidebar">
+                    <svg id="idea-icon-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="17" x2="12" y2="22"></line>
+                        <path d="M5 17h14v-2l-2-2V5h1V3H6v2h1v8l-2 2v2z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Контент: Закладки (дерево) -->
+        <div class="idea-sidebar-content">
+            <div id="idea-view-bookmarks"></div>
+        </div>
+    </aside>
+
+    <!-- Кнопки в левом верхнем углу (скрыты, появляются при наведении мыши в угол) -->
+    <div class="top-actions">
+        <!-- Боковая панель закладок -->
+        <button id="btn-sidebar-toggle" class="action-btn" title="Bookmarks (Alt+B)" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+            </svg>
+        </button>
+
+        <!-- Полноэкранный режим -->
+        <button id="btn-fullscreen" class="action-btn" title="Fullscreen mode" type="button">
+            <!-- Иконка входа в Fullscreen -->
+            <svg id="icon-fs-enter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+            </svg>
+            <!-- Иконка выхода из Fullscreen -->
+            <svg id="icon-fs-exit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
+            </svg>
+        </button>
+
+        <!-- Настройки -->
+        <button id="btn-settings" class="action-btn" title="Settings" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Основная рабочая область (сдвигается влево при открытии sidebar) -->
+    <main id="main-content" class="main-content">
+        <!-- Основная форма поиска -->
+        <form id="search-form" action="https://www.google.com/search" method="GET">
+            <div class="input-wrapper">
+                <div id="ghost-text" aria-hidden="true"><span id="ghost-typed"></span><span id="ghost-suffix"></span></div>
+                <div id="caret-mirror" aria-hidden="true"></div>
+                <textarea name="q" placeholder="Search in Google..." autofocus autocomplete="off" id="search-input" rows="1"></textarea>
+                <div id="custom-caret"></div>
+            </div>
+            <span id="measure-text" class="text-measure" aria-hidden="true"></span>
+            <span id="measure-char" class="text-measure" aria-hidden="true"></span>
+        </form>
+    </main>
+
+    <!-- Модальное окно настроек (с собственным боковым sidebar без рамок) -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-container">
+            <!-- Боковой sidebar настроек -->
+            <aside class="modal-sidebar" aria-label="Settings navigation">
+                <div class="modal-sidebar-header">
+                    <span id="modal-settings-title" class="modal-sidebar-title">Settings</span>
+                </div>
+                <nav class="modal-sidebar-nav">
+                    <button id="tab-history-btn" class="modal-tab-btn active" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <span class="tab-label">History</span>
+                    </button>
+                    <button id="tab-engine-btn" class="modal-tab-btn" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <span class="tab-label">Search Engine</span>
+                    </button>
+                    <button id="tab-alias-btn" class="modal-tab-btn" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        <span class="tab-label">Quick Search</span>
+                    </button>
+                    <button id="tab-shortcuts-btn" class="modal-tab-btn" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="6" y1="8" x2="6" y2="8"></line><line x1="10" y1="8" x2="10" y2="8"></line><line x1="14" y1="8" x2="14" y2="8"></line><line x1="18" y1="8" x2="18" y2="8"></line><line x1="6" y1="12" x2="6" y2="12"></line><line x1="10" y1="12" x2="10" y2="12"></line><line x1="14" y1="12" x2="14" y2="12"></line><line x1="18" y1="12" x2="18" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>
+                        <span class="tab-label">Shortcuts</span>
+                    </button>
+                    <button id="tab-theme-btn" class="modal-tab-btn" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></svg>
+                        <span class="tab-label">Theme & Colors</span>
+                    </button>
+                    <button id="tab-lang-btn" class="modal-tab-btn" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                        <span class="tab-label">Language</span>
+                    </button>
+                </nav>
+                <div class="modal-sidebar-footer">
+                    <span class="nav-key-hint" title="Use Q / E to switch tabs">Q / E</span>
+                </div>
+            </aside>
+
+            <!-- Основная панель содержимого настроек -->
+            <div class="modal-main-wrap">
+                <div class="modal-content-header">
+                    <span id="modal-active-tab-title" class="modal-content-title">History</span>
+                    <button id="modal-close-btn" class="modal-close-btn" type="button" title="Close">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Вкладка 1: История поиска -->
+                    <div id="tab-history-content" class="tab-content active">
+                    <div class="history-header">
+                        <span id="history-count" class="history-count">Total records: 0</span>
+                        <button id="btn-clear-history" class="btn-secondary" type="button">Clear all</button>
+                    </div>
+                    <div id="history-list" class="items-list"></div>
+                </div>
+
+                <!-- Вкладка 2: Поисковая система (Search Engine) -->
+                <div id="tab-engine-content" class="tab-content">
+                    <div id="engine-title" class="theme-label">Select search engine:</div>
+                    <div id="engine-options" class="engine-options"></div>
+                    <div style="margin-top: auto; padding-top: 16px; display: flex; justify-content: flex-end;">
+                        <button id="btn-reset-engine" class="btn-secondary" type="button">Reset to Google</button>
+                    </div>
+                </div>
+
+                <!-- Вкладка 3: Быстрый поиск (переменные) -->
+                <div id="tab-alias-content" class="tab-content">
+                    <form id="alias-form" class="alias-form">
+                        <input id="alias-key-input" class="modal-input alias-key-input" type="text" placeholder="Shortcut (e.g. l3000)" autocomplete="off" required>
+                        <input id="alias-url-input" class="modal-input alias-url-input" type="text" placeholder="Address (e.g. localhost:3000)" autocomplete="off" required>
+                        <button id="alias-submit-btn" class="btn-primary" type="submit">Add</button>
+                    </form>
+                    <div id="alias-list" class="items-list"></div>
+                </div>
+
+                <!-- Вкладка 4: Горячие клавиши (Shortcuts) -->
+                <div id="tab-shortcuts-content" class="tab-content">
+                    <label class="shortcut-hints-row">
+                        <input type="checkbox" id="chk-shortcut-hints">
+                        <span class="custom-chk"></span>
+                        <span id="label-shortcut-hints" class="shortcut-hints-label">Show shortcut hints on buttons</span>
+                    </label>
+                    <div id="shortcuts-list" class="shortcuts-list"></div>
+                    <div style="margin-top: auto; padding-top: 16px; display: flex; justify-content: flex-end;">
+                        <button id="btn-reset-shortcuts" class="btn-secondary" type="button">Reset to default shortcuts</button>
+                    </div>
+                </div>
+
+                <!-- Вкладка 5: Цвета и тема -->
+                <div id="tab-theme-content" class="tab-content">
+                    <div class="theme-section">
+                        <div id="theme-bg-label" class="theme-label">Page background color:</div>
+                        <div class="color-presets" id="bg-presets">
+                            <button class="color-circle" data-color="#000000" style="background:#000000;" title="Black"></button>
+                            <button class="color-circle" data-color="#0d1117" style="background:#0d1117;" title="Dark Graphite"></button>
+                            <button class="color-circle" data-color="#080e1a" style="background:#080e1a;" title="Cyber Blue"></button>
+                            <button class="color-circle" data-color="#0f0a1c" style="background:#0f0a1c;" title="Deep Purple"></button>
+                            <button class="color-circle" data-color="#08140c" style="background:#08140c;" title="Matrix Green"></button>
+                            <label class="custom-color-wrap" title="Custom background color">
+                                <input type="color" id="picker-bg" value="#000000">
+                                <span id="custom-bg-text">Custom</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="theme-section">
+                        <div id="theme-text-label" class="theme-label">Text & cursor color:</div>
+                        <div class="color-presets" id="text-presets">
+                            <button class="color-circle" data-color="#ffffff" style="background:#ffffff;" title="White"></button>
+                            <button class="color-circle" data-color="#00ff66" style="background:#00ff66;" title="Neon Green"></button>
+                            <button class="color-circle" data-color="#00f0ff" style="background:#00f0ff;" title="Cyber Cyan"></button>
+                            <button class="color-circle" data-color="#ffb800" style="background:#ffb800;" title="Amber"></button>
+                            <button class="color-circle" data-color="#ff2a85" style="background:#ff2a85;" title="Neon Pink"></button>
+                            <button class="color-circle" data-color="#c084fc" style="background:#c084fc;" title="Lavender"></button>
+                            <label class="custom-color-wrap" title="Custom text color">
+                                <input type="color" id="picker-text" value="#ffffff">
+                                <span id="custom-text-text">Custom</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="theme-section">
+                        <div id="sidebar-pos-label" class="theme-label">Sidebar position:</div>
+                        <div class="pos-options">
+                            <button id="btn-pos-left" class="pos-btn" data-pos="left" type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="9" y1="3" x2="9" y2="21"></line>
+                                </svg>
+                                <span id="pos-left-text">Left</span>
+                            </button>
+                            <button id="btn-pos-right" class="pos-btn active" data-pos="right" type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="15" y1="3" x2="15" y2="21"></line>
+                                </svg>
+                                <span id="pos-right-text">Right</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: auto; padding-top: 16px; display: flex; justify-content: flex-end;">
+                        <button id="btn-reset-theme" class="btn-secondary" type="button">Reset to default colors</button>
+                    </div>
+                </div>
+
+                <!-- Вкладка 6: Язык (Language) -->
+                <div id="tab-lang-content" class="tab-content">
+                    <div id="lang-title" class="theme-label">Select interface language:</div>
+                    <div class="lang-options">
+                        <button class="lang-card active" data-lang="en" type="button">
+                            <span class="lang-code">EN</span>
+                            <span class="lang-name">English</span>
+                            <svg class="lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </button>
+                        <button class="lang-card" data-lang="uz" type="button">
+                            <span class="lang-code">UZ</span>
+                            <span class="lang-name">O'zbekcha</span>
+                            <svg class="lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </button>
+                        <button class="lang-card" data-lang="ru" type="button">
+                            <span class="lang-code">RU</span>
+                            <span class="lang-name">Русский</span>
+                            <svg class="lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </button>
+                        <button class="lang-card" data-lang="es" type="button">
+                            <span class="lang-code">ES</span>
+                            <span class="lang-name">Español</span>
+                            <svg class="lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </button>
+                        <button class="lang-card" data-lang="pt" type="button">
+                            <span class="lang-code">PT</span>
+                            <span class="lang-name">Português</span>
+                            <svg class="lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </button>
+                        <button class="lang-card" data-lang="de" type="button">
+                            <span class="lang-code">DE</span>
+                            <span class="lang-name">Deutsch</span>
+                            <svg class="lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </button>
+                        <button class="lang-card" data-lang="zh" type="button">
+                            <span class="lang-code">ZH</span>
+                            <span class="lang-name">简体中文</span>
+                            <svg class="lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </button>
+                        <button class="lang-card" data-lang="ja" type="button">
+                            <span class="lang-code">JA</span>
+                            <span class="lang-name">日本語</span>
+                            <svg class="lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </button>
+                        <button class="lang-card" data-lang="ko" type="button">
+                            <span class="lang-code">KO</span>
+                            <span class="lang-name">한국어</span>
+                            <svg class="lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </button>
+                        <button class="lang-card" data-lang="ar" type="button">
+                            <span class="lang-code">AR</span>
+                            <span class="lang-name">العربية</span>
+                            <svg class="lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </button>
+                        <button class="lang-card" data-lang="hi" type="button">
+                            <span class="lang-code">HI</span>
+                            <span class="lang-name">हिन्दी</span>
+                            <svg class="lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script src="start.js"></script>
+</body>
+</html>

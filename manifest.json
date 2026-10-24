@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "CleanTab - Minimal Fast New Tab Page",
+  "short_name": "CleanTab",
+  "version": "1.0.0",
+  "description": "A fast, minimal new tab with bookmarks manager, smart search aliases, search history, custom themes and shortcuts.",
+  "offline_enabled": true,
+  "minimum_chrome_version": "88",
+  "icons": {
+    "16": "icon.png",
+    "32": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "permissions": [
+    "bookmarks",
+    "tabs",
+    "favicon"
+  ],
+  "chrome_url_overrides": {
+    "newtab": "redirect.html"
+  }
+}
