@@ -238,8 +238,16 @@
             position: relative;
             width: 100%;
             border-radius: 28px;
-            box-shadow: 0 0 60px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.06);
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.45);
+            border: none;
+            outline: none;
             box-sizing: border-box;
+        }
+
+        .input-wrapper:hover,
+        .input-wrapper:focus-within {
+            border: none;
+            outline: none;
         }
 
         /* Общие правила типографики для поля ввода, автозаполнения и зеркала */
@@ -278,6 +286,11 @@
             min-height: 70px;
             max-height: 240px;
             height: 70px;
+        }
+        #search-input:focus,
+        #search-input:hover {
+            border: none;
+            outline: none;
         }
         #search-input::-webkit-scrollbar {
             display: none;
