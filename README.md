@@ -13,6 +13,9 @@ Modern browser start pages are frequently encumbered by telemetry, resource-heav
 ### Input Interface and Search Resolution
 CleanTab provides a unified input field supporting multi-line query composition, 2D cursor projection, and ghost-text auto-completion derived from historical inputs. The search dispatcher supports configurable search engines (including Google, DuckDuckGo, Brave, Bing, Yandex, and Ecosia) and deterministic alias expansion for instantaneous local or remote URL routing.
 
+### AI Dispatch and Assistant Routing
+Direct keyboard routing to major AI chat platforms. Configured out of the box with `!ai <prompt>` pointing to ChatGPT, CleanTab supports custom AI services, presets for Claude, DeepSeek, and Perplexity, as well as single-key autocompletion (`Tab`). All prompts deep-link directly into the chat session without external telemetry.
+
 ### Bookmarks Subsystem
 An integrated, collapsible bookmarks drawer provides hierarchical tree traversal, real-time filtering, node persistence (pinning), and direct deletion workflows through standard browser APIs.
 
@@ -62,7 +65,7 @@ Key bindings can be customized within the Settings panel.
 * Platform: Chromium Manifest V3
 * Dependencies: Zero external runtime dependencies
 * Storage Engine: HTML5 Web Storage (`localStorage`)
-* Browser Permissions: `bookmarks`, `tabs`, `favicon`
+* Browser Permissions: `bookmarks`, `favicon`
 
 ## License
 

@@ -20,7 +20,6 @@ CleanTab does **not** collect, store, transmit, or share any personal informatio
 CleanTab requests only the minimal set of permissions required to deliver its core functionality:
 
 * **`bookmarks`**: Used exclusively to read and display your bookmarks hierarchy in the slide-out bookmarks drawer, and to allow local bookmark management (such as deleting a bookmark). No bookmark information is ever transmitted or shared.
-* **`tabs`**: Used strictly to navigate the active browser tab or open new tabs when clicking on search queries, aliases, or bookmark links.
 * **`favicon`**: Used to load and display website icons alongside bookmarks in the bookmarks manager to aid visual navigation.
 
 ---
