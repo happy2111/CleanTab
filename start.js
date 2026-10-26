@@ -4670,21 +4670,54 @@ function updateCaret() {
     const mirror = document.getElementById('caret-mirror');
     if (mirror) {
         mirror.innerHTML = '';
+
+        // 1. Измеряем эталонную ширину знакоместа (1ch / '0') для текущего шрифта
+        const refSpan = document.createElement('span');
+        refSpan.textContent = '0';
+        mirror.appendChild(refSpan);
+        const refRect = refSpan.getBoundingClientRect();
+        const defaultCharWidth = refRect.width > 0 ? refRect.width : 16;
+        mirror.removeChild(refSpan);
+
+        // 2. Строим зеркало: текст до курсора + целевой маркер
         const textSpan = document.createElement('span');
         textSpan.textContent = textBefore;
         mirror.appendChild(textSpan);
 
+        const isAtEnd = (selStart >= val.length);
+        const nextChar = isAtEnd ? null : val[selStart];
+
         const marker = document.createElement('span');
-        const nextChar = val[selStart];
-        marker.textContent = nextChar ? (nextChar === ' ' ? '\u00A0' : nextChar) : '\u00A0';
+        if (isAtEnd) {
+            // В конце строки используем неразрывный пробел для точного позиционирования точки вставки
+            marker.textContent = '\u00A0';
+        } else {
+            marker.textContent = nextChar === ' ' ? '\u00A0' : nextChar;
+        }
         mirror.appendChild(marker);
 
-        const left = marker.offsetLeft - (input.scrollLeft || 0);
-        const charWidth = marker.offsetWidth;
-        const charHeight = marker.offsetHeight;
-        const charTop = marker.offsetTop - (input.scrollTop || 0);
+        const mirrorRect = mirror.getBoundingClientRect();
+        const markerRect = marker.getBoundingClientRect();
 
-        if (charTop < -20 || charTop > input.clientHeight + 10) {
+        const subpixelLeft = markerRect.left - mirrorRect.left - (input.scrollLeft || 0);
+        const subpixelTop = markerRect.top - mirrorRect.top - (input.scrollTop || 0);
+
+        // 3. Точная ширина символа без искусственных ограничений
+        let charWidth;
+        if (isAtEnd) {
+            // Вариант А: в конце строки курсор стоит справа от текста с шириной эталонного знакоместа шрифта
+            charWidth = defaultCharWidth;
+        } else if (nextChar === ' ') {
+            // Для пробела внутри текста используем его реальную ширину (или не менее 8px)
+            charWidth = Math.max(markerRect.width, 8);
+        } else {
+            // Для любой буквы (узкой i, l или широкой W, M, Ж, Ш) — 100% точная субпиксельная ширина
+            charWidth = markerRect.width;
+        }
+
+        const charHeight = markerRect.height || 38;
+
+        if (subpixelTop < -30 || subpixelTop > input.clientHeight + 15) {
             caret.style.display = 'none';
             return;
         }
@@ -4692,70 +4725,39 @@ function updateCaret() {
         caret.style.display = 'block';
 
         if (style === 'bar') {
-            const barHeight = Math.max(24, Math.round(charHeight * 0.85));
-            const topOffset = charTop + Math.round((charHeight - barHeight) / 2);
-            caret.style.left = left + 'px';
+            const barHeight = Math.max(24, Math.round(charHeight * 0.82));
+            const topOffset = subpixelTop + Math.round((charHeight - barHeight) / 2);
+            caret.style.left = subpixelLeft + 'px';
             caret.style.top = topOffset + 'px';
             caret.style.width = '2.5px';
             caret.style.height = barHeight + 'px';
             caret.style.bottom = 'auto';
         } else if (style === 'block') {
-            const blockWidth = Math.max(16, charWidth);
-            const blockHeight = Math.max(26, charHeight - 2);
-            caret.style.left = left + 'px';
-            caret.style.top = (charTop + 1) + 'px';
-            caret.style.width = blockWidth + 'px';
+            // Блок: точно облегает символ по высоте и ширине шрифта
+            const blockHeight = Math.max(26, Math.round(charHeight * 0.88));
+            const topOffset = subpixelTop + Math.round((charHeight - blockHeight) / 2);
+            caret.style.left = subpixelLeft + 'px';
+            caret.style.top = topOffset + 'px';
+            caret.style.width = charWidth + 'px';
             caret.style.height = blockHeight + 'px';
             caret.style.bottom = 'auto';
         } else if (style === 'highlight') {
-            const hlWidth = Math.max(16, charWidth);
-            const hlHeight = Math.max(26, charHeight - 2);
-            caret.style.left = left + 'px';
-            caret.style.top = (charTop + 1) + 'px';
-            caret.style.width = hlWidth + 'px';
+            // Подсветка: рамка вокруг символа с точной шириной
+            const hlHeight = Math.max(26, Math.round(charHeight * 0.88));
+            const topOffset = subpixelTop + Math.round((charHeight - hlHeight) / 2);
+            caret.style.left = subpixelLeft + 'px';
+            caret.style.top = topOffset + 'px';
+            caret.style.width = charWidth + 'px';
             caret.style.height = hlHeight + 'px';
             caret.style.bottom = 'auto';
         } else {
-            // underline (по умолчанию)
-            const width = Math.max(16, charWidth);
-            const top = marker.offsetTop + charHeight - 5 - (input.scrollTop || 0);
-            caret.style.left = left + 'px';
+            // Underline (подчёркивание): точно под текущей буквой или знакоместом
+            const underlineHeight = 4.5;
+            const top = subpixelTop + charHeight - 6;
+            caret.style.left = subpixelLeft + 'px';
             caret.style.top = top + 'px';
-            caret.style.width = width + 'px';
-            caret.style.height = '5px';
-            caret.style.bottom = 'auto';
-        }
-    } else {
-        measureText.textContent = textBefore;
-        const textWidth = measureText.getBoundingClientRect().width;
-        let charWidth = 18;
-        if (selStart < val.length) {
-            measureChar.textContent = val[selStart];
-            const w = measureChar.getBoundingClientRect().width;
-            if (w > 0) charWidth = w;
-        }
-        caret.style.display = 'block';
-        const left = 12 + textWidth;
-        const inputH = input.offsetHeight || 70;
-
-        if (style === 'bar') {
-            const barH = 30;
-            caret.style.left = left + 'px';
-            caret.style.top = (inputH - barH - 18) + 'px';
-            caret.style.width = '2.5px';
-            caret.style.height = barH + 'px';
-            caret.style.bottom = 'auto';
-        } else if (style === 'block' || style === 'highlight') {
-            caret.style.left = left + 'px';
-            caret.style.top = (inputH - 36 - 15) + 'px';
             caret.style.width = charWidth + 'px';
-            caret.style.height = '34px';
-            caret.style.bottom = 'auto';
-        } else {
-            caret.style.left = left + 'px';
-            caret.style.top = (inputH - 19) + 'px';
-            caret.style.width = charWidth + 'px';
-            caret.style.height = '5px';
+            caret.style.height = underlineHeight + 'px';
             caret.style.bottom = 'auto';
         }
     }
