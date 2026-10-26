@@ -1534,6 +1534,70 @@
         }
 
         /* Выбор расположения боковой панели */
+        
+        /* Стили для детальной настройки прозрачности и размытия боковой панели */
+        .sidebar-slider-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .sidebar-slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12.5px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .sidebar-slider-val {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-color, #ffffff);
+            font-variant-numeric: tabular-nums;
+        }
+        .custom-range {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 5px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.15);
+            outline: none;
+            transition: background 0.2s ease;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+        .custom-range:hover {
+            background: rgba(255, 255, 255, 0.22);
+        }
+        .custom-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--text-color, #ffffff);
+            cursor: pointer;
+            border: none;
+            box-shadow: none;
+            transition: transform 0.15s ease;
+        }
+        .custom-range::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+        .custom-range::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--text-color, #ffffff);
+            cursor: pointer;
+            border: none;
+            box-shadow: none;
+            transition: transform 0.15s ease;
+        }
+        .custom-range::-moz-range-thumb:hover {
+            transform: scale(1.15);
+        }
+
         .pos-options {
             display: inline-flex;
             gap: 4px;
@@ -2087,7 +2151,9 @@
             left: auto;
             width: 340px;
             height: calc(100vh - 24px);
-            background-color: var(--bg-color);
+            background-color: var(--sidebar-bg, var(--bg-color));
+            backdrop-filter: blur(var(--sidebar-blur, 0px));
+            -webkit-backdrop-filter: blur(var(--sidebar-blur, 0px));
             border: none;
             border-radius: 50px;
             box-sizing: border-box;
@@ -2110,17 +2176,20 @@
         }
         .idea-sidebar.open {
             transform: translateX(0);
-            box-shadow: 0 0 60px rgba(0, 0, 0, 0.55), 0 0 120px rgba(0, 0, 0, 0.25);
+            box-shadow: var(--shadow-sidebar, none);
         }
         body.sidebar-pos-left .idea-sidebar.open {
             transform: translateX(0);
-            box-shadow: 0 0 60px rgba(0, 0, 0, 0.55), 0 0 120px rgba(0, 0, 0, 0.25);
+            box-shadow: var(--shadow-sidebar-left, none);
         }
         .idea-sidebar.no-transition {
             transition: none !important;
         }
         .idea-sidebar.pinned {
-            box-shadow: 0 0 60px rgba(0, 0, 0, 0.55), 0 0 120px rgba(0, 0, 0, 0.25);
+            box-shadow: var(--shadow-sidebar, none);
+        }
+        body.sidebar-pos-left .idea-sidebar.pinned {
+            box-shadow: var(--shadow-sidebar-left, none);
         }
 
         /* Шапка боковой панели */
@@ -2902,12 +2971,46 @@
                                 <span id="pos-right-text">Right</span>
                             </button>
                         </div>
-                        <div style="margin-top: 10px;">
+                        <div style="margin-top: 12px;">
                             <label class="shortcut-hints-row" style="margin: 0; max-width: 320px;">
                                 <input type="checkbox" id="chk-sidebar-blur">
                                 <span class="custom-chk"></span>
                                 <span id="label-sidebar-blur" class="shortcut-hints-label">Blur & transparent effect</span>
                             </label>
+                        </div>
+
+                        <!-- Детальные настройки прозрачности и размытия боковой панели -->
+                        <div id="sidebar-blur-controls" style="margin-top: 10px; padding: 12px 14px; background: rgba(255, 255, 255, 0.03); border-radius: 12px; display: none; flex-direction: column; gap: 12px; box-sizing: border-box;">
+                            <div style="display: flex; gap: 6px; flex-wrap: wrap;" id="sidebar-preset-group">
+                                <button type="button" class="pill-btn sidebar-preset-btn" data-opacity="0" data-blur="0">
+                                    <span id="preset-pure-transparent-text">Pure Transparent</span>
+                                </button>
+                                <button type="button" class="pill-btn sidebar-preset-btn" data-opacity="20" data-blur="16">
+                                    <span id="preset-glass-text">Glass</span>
+                                </button>
+                                <button type="button" class="pill-btn sidebar-preset-btn" data-opacity="50" data-blur="26">
+                                    <span id="preset-frosted-text">Frosted</span>
+                                </button>
+                                <button type="button" class="pill-btn sidebar-preset-btn" data-opacity="100" data-blur="0">
+                                    <span id="preset-solid-text">Solid</span>
+                                </button>
+                            </div>
+
+                            <div class="sidebar-slider-row">
+                                <div class="sidebar-slider-header">
+                                    <span id="label-sidebar-opacity">Opacity:</span>
+                                    <span id="val-sidebar-opacity" class="sidebar-slider-val">40%</span>
+                                </div>
+                                <input type="range" id="range-sidebar-opacity" class="custom-range" min="0" max="100" value="40" step="1">
+                            </div>
+
+                            <div class="sidebar-slider-row">
+                                <div class="sidebar-slider-header">
+                                    <span id="label-sidebar-blur-amount">Blur intensity:</span>
+                                    <span id="val-sidebar-blur" class="sidebar-slider-val">20px</span>
+                                </div>
+                                <input type="range" id="range-sidebar-blur" class="custom-range" min="0" max="45" value="20" step="1">
+                            </div>
                         </div>
                     </div>
 

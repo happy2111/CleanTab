@@ -139,6 +139,17 @@ const chkBgBlur = document.getElementById('chk-bg-blur');
 const labelBgBlur = document.getElementById('label-bg-blur');
 const chkSidebarBlur = document.getElementById('chk-sidebar-blur');
 const labelSidebarBlur = document.getElementById('label-sidebar-blur');
+const sidebarBlurControls = document.getElementById('sidebar-blur-controls');
+const rangeSidebarOpacity = document.getElementById('range-sidebar-opacity');
+const valSidebarOpacity = document.getElementById('val-sidebar-opacity');
+const rangeSidebarBlur = document.getElementById('range-sidebar-blur');
+const valSidebarBlur = document.getElementById('val-sidebar-blur');
+const labelSidebarOpacity = document.getElementById('label-sidebar-opacity');
+const labelSidebarBlurAmount = document.getElementById('label-sidebar-blur-amount');
+const presetPureTransparentText = document.getElementById('preset-pure-transparent-text');
+const presetGlassText = document.getElementById('preset-glass-text');
+const presetFrostedText = document.getElementById('preset-frosted-text');
+const presetSolidText = document.getElementById('preset-solid-text');
 
 const themeFontLabel = document.getElementById('theme-font-label');
 const fontSelect = document.getElementById('font-select');
@@ -319,7 +330,13 @@ const translations = {
         animSpinner: "Spinner",
         animLine: "Line",
         animPulse: "Pulse",
-        animNone: "None"
+        animNone: "None",
+        sidebarOpacityLabel: "Opacity:",
+        sidebarBlurAmountLabel: "Blur intensity:",
+        presetPureTransparent: "Pure Transparent",
+        presetGlass: "Glass",
+        presetFrosted: "Frosted",
+        presetSolid: "Solid"
     },
     uz: {
         title: "Yangi varaq",
@@ -449,7 +466,13 @@ const translations = {
         animSpinner: "Aylanuvchi",
         animLine: "Chiziq",
         animPulse: "Puls",
-        animNone: "Yo'q"
+        animNone: "Yo'q",
+        sidebarOpacityLabel: "Shaffoflik:",
+        sidebarBlurAmountLabel: "Xiralashtirish kuchi:",
+        presetPureTransparent: "To'liq shaffof",
+        presetGlass: "Shisha",
+        presetFrosted: "Muzlagan oyna",
+        presetSolid: "Yaxlit"
     },
     ru: {
         title: "Новая вкладка",
@@ -579,7 +602,13 @@ const translations = {
         animSpinner: "Спиннер",
         animLine: "Линия",
         animPulse: "Пульс",
-        animNone: "Без анимации"
+        animNone: "Без анимации",
+        sidebarOpacityLabel: "Непрозрачность:",
+        sidebarBlurAmountLabel: "Сила размытия:",
+        presetPureTransparent: "Полная прозрачность",
+        presetGlass: "Стекло",
+        presetFrosted: "Матовое стекло",
+        presetSolid: "Сплошной"
     },
     es: {
         title: "Nueva pestaña",
@@ -684,7 +713,13 @@ const translations = {
         animSpinner: "Giro",
         animLine: "Línea",
         animPulse: "Pulso",
-        animNone: "Ninguna"
+        animNone: "Ninguna",
+        sidebarOpacityLabel: "Opacidad:",
+        sidebarBlurAmountLabel: "Intensidad de desenfoque:",
+        presetPureTransparent: "Transparente puro",
+        presetGlass: "Vidrio",
+        presetFrosted: "Esmerilado",
+        presetSolid: "Sólido"
     },
     pt: {
         title: "Novo separador",
@@ -789,7 +824,13 @@ const translations = {
         animSpinner: "Girador",
         animLine: "Linha",
         animPulse: "Pulsação",
-        animNone: "Nenhum"
+        animNone: "Nenhum",
+        sidebarOpacityLabel: "Opacidade:",
+        sidebarBlurAmountLabel: "Intensidade do desfoque:",
+        presetPureTransparent: "Transparente puro",
+        presetGlass: "Vidro",
+        presetFrosted: "Fosco",
+        presetSolid: "Sólido"
     },
     de: {
         title: "Neuer Tab",
@@ -894,7 +935,13 @@ const translations = {
         animSpinner: "Spinner",
         animLine: "Linie",
         animPulse: "Pulsieren",
-        animNone: "Keine"
+        animNone: "Keine",
+        sidebarOpacityLabel: "Deckkraft:",
+        sidebarBlurAmountLabel: "Unschärfe-Intensität:",
+        presetPureTransparent: "Reine Transparenz",
+        presetGlass: "Glas",
+        presetFrosted: "Mattiert",
+        presetSolid: "Vollflächig"
     },
     zh: {
         title: "新标签页",
@@ -999,7 +1046,13 @@ const translations = {
         animSpinner: "微旋",
         animLine: "进度条",
         animPulse: "脉冲",
-        animNone: "无"
+        animNone: "无",
+        sidebarOpacityLabel: "不透明度：",
+        sidebarBlurAmountLabel: "模糊强度：",
+        presetPureTransparent: "完全透明",
+        presetGlass: "通透玻璃",
+        presetFrosted: "毛玻璃",
+        presetSolid: "纯色"
     },
     ja: {
         title: "新しいタブ",
@@ -1104,7 +1157,13 @@ const translations = {
         animSpinner: "スピナー",
         animLine: "ライン",
         animPulse: "パルス",
-        animNone: "なし"
+        animNone: "なし",
+        sidebarOpacityLabel: "不透明度：",
+        sidebarBlurAmountLabel: "ぼかしの強さ：",
+        presetPureTransparent: "完全透明",
+        presetGlass: "クリアガラス",
+        presetFrosted: "すりガラス",
+        presetSolid: "ソリッド"
     },
     ko: {
         title: "새 탭",
@@ -1209,7 +1268,13 @@ const translations = {
         animSpinner: "스피너",
         animLine: "라인",
         animPulse: "펄스",
-        animNone: "없음"
+        animNone: "없음",
+        sidebarOpacityLabel: "불투명도:",
+        sidebarBlurAmountLabel: "블러 강도:",
+        presetPureTransparent: "완전 투명",
+        presetGlass: "유리",
+        presetFrosted: "반투명 유리",
+        presetSolid: "단색"
     },
     ar: {
         title: "علامة تبويب جديدة",
@@ -1314,7 +1379,13 @@ const translations = {
         animSpinner: "مؤشر دوار",
         animLine: "خط",
         animPulse: "نبض",
-        animNone: "بدون"
+        animNone: "بدون",
+        sidebarOpacityLabel: "الشفافية:",
+        sidebarBlurAmountLabel: "شدة التمويه:",
+        presetPureTransparent: "شفاف تماماً",
+        presetGlass: "زجاج",
+        presetFrosted: "زجاج مصنفر",
+        presetSolid: "صلب"
     },
     hi: {
         title: "नया टैब",
@@ -1419,7 +1490,13 @@ const translations = {
         animSpinner: "स्पिनर",
         animLine: "लाइन",
         animPulse: "पल्स",
-        animNone: "कोई नहीं"
+        animNone: "कोई नहीं",
+        sidebarOpacityLabel: "अपारदर्शिता:",
+        sidebarBlurAmountLabel: "धुंधलापन तीव्रता:",
+        presetPureTransparent: "पूरी तरह पारदर्शी",
+        presetGlass: "कांच",
+        presetFrosted: "धुंधला कांच",
+        presetSolid: "ठोस"
     }
 };
 
@@ -1537,6 +1614,12 @@ function setLanguage(lang) {
     if (posLeftText) posLeftText.textContent = t.posLeft;
     if (posRightText) posRightText.textContent = t.posRight;
     if (labelSidebarBlur) labelSidebarBlur.textContent = t.sidebarBlurLabel || "Blur & transparent effect";
+    if (labelSidebarOpacity) labelSidebarOpacity.textContent = t.sidebarOpacityLabel || "Opacity:";
+    if (labelSidebarBlurAmount) labelSidebarBlurAmount.textContent = t.sidebarBlurAmountLabel || "Blur intensity:";
+    if (presetPureTransparentText) presetPureTransparentText.textContent = t.presetPureTransparent || "Pure Transparent";
+    if (presetGlassText) presetGlassText.textContent = t.presetGlass || "Glass";
+    if (presetFrostedText) presetFrostedText.textContent = t.presetFrosted || "Frosted";
+    if (presetSolidText) presetSolidText.textContent = t.presetSolid || "Solid";
 
     const themeCursorLabel = document.getElementById('theme-cursor-label');
     const cursorUnderlineText = document.getElementById('cursor-underline-text');
@@ -2092,6 +2175,8 @@ if (btnResetTheme) {
             localStorage.removeItem(BG_IMAGE_KEY);
             localStorage.removeItem(BG_BLUR_KEY);
             localStorage.removeItem(SIDEBAR_BLUR_KEY);
+            localStorage.removeItem(SIDEBAR_OPACITY_KEY);
+            localStorage.removeItem(SIDEBAR_BLUR_AMOUNT_KEY);
             localStorage.removeItem(CUSTOM_PLACEHOLDER_KEY);
             localStorage.removeItem(ALIAS_ANIM_KEY);
         } catch (e) {}
@@ -4322,6 +4407,10 @@ function setSidebarPosition(pos) {
 }
 
 const SIDEBAR_BLUR_KEY = 'sidebar_blur';
+const SIDEBAR_OPACITY_KEY = 'sidebar_opacity';
+const SIDEBAR_BLUR_AMOUNT_KEY = 'sidebar_blur_amount';
+const DEFAULT_SIDEBAR_OPACITY = 40;
+const DEFAULT_SIDEBAR_BLUR_AMOUNT = 20;
 
 function isSidebarBlurEnabled() {
     try {
@@ -4331,14 +4420,81 @@ function isSidebarBlurEnabled() {
     }
 }
 
+function getSidebarOpacity() {
+    try {
+        const val = parseInt(localStorage.getItem(SIDEBAR_OPACITY_KEY), 10);
+        if (!isNaN(val) && val >= 0 && val <= 100) return val;
+    } catch (e) {}
+    return DEFAULT_SIDEBAR_OPACITY;
+}
+
+function getSidebarBlurAmount() {
+    try {
+        const val = parseInt(localStorage.getItem(SIDEBAR_BLUR_AMOUNT_KEY), 10);
+        if (!isNaN(val) && val >= 0 && val <= 45) return val;
+    } catch (e) {}
+    return DEFAULT_SIDEBAR_BLUR_AMOUNT;
+}
+
+function applySidebarBlurSettings() {
+    const enabled = isSidebarBlurEnabled();
+    const opacity = getSidebarOpacity();
+    const blur = getSidebarBlurAmount();
+
+    if (chkSidebarBlur) chkSidebarBlur.checked = enabled;
+    if (sidebarBlurControls) sidebarBlurControls.style.display = enabled ? 'flex' : 'none';
+
+    if (rangeSidebarOpacity) rangeSidebarOpacity.value = opacity;
+    if (valSidebarOpacity) {
+        valSidebarOpacity.textContent = opacity === 0 ? '0% (Transparent)' : (opacity + '%');
+    }
+
+    if (rangeSidebarBlur) rangeSidebarBlur.value = blur;
+    if (valSidebarBlur) {
+        valSidebarBlur.textContent = blur === 0 ? '0px (None)' : (blur + 'px');
+    }
+
+    document.querySelectorAll('.sidebar-preset-btn').forEach(btn => {
+        const pOp = parseInt(btn.dataset.opacity, 10);
+        const pBl = parseInt(btn.dataset.blur, 10);
+        btn.classList.toggle('active', enabled && pOp === opacity && pBl === blur);
+    });
+
+    const root = document.documentElement;
+    if (enabled) {
+        const alpha = opacity / 100;
+        const currentTheme = (typeof getTheme === 'function') ? getTheme() : { bg: '#000000' };
+        const themeBg = currentTheme.bg || '#000000';
+        const sidebarBg = hexToRgba(themeBg, alpha);
+        root.style.setProperty('--sidebar-bg', sidebarBg);
+        root.style.setProperty('--sidebar-blur', blur + 'px');
+    } else {
+        root.style.setProperty('--sidebar-bg', 'var(--bg-color)');
+        root.style.setProperty('--sidebar-blur', '0px');
+    }
+}
+
 function setSidebarBlur(enabled) {
     try {
         localStorage.setItem(SIDEBAR_BLUR_KEY, String(enabled));
     } catch (e) {}
-    if (chkSidebarBlur) chkSidebarBlur.checked = enabled;
-    if (document.body) {
-        document.body.classList.toggle('sidebar-blur-enabled', enabled);
-    }
+    applySidebarBlurSettings();
+}
+
+function setSidebarOpacity(opacity) {
+    opacity = Math.max(0, Math.min(100, parseInt(opacity, 10) || 0));
+    try {
+        localStorage.setItem(SIDEBAR_OPACITY_KEY, String(opacity));
+    } catch (e) {}
+    applySidebarBlurSettings();
+}
+
+function setSidebarBlurAmount(blur) {
+    blur = Math.max(0, Math.min(45, parseInt(blur, 10) || 0));
+    try {
+        localStorage.setItem(SIDEBAR_BLUR_AMOUNT_KEY, String(blur));
+    } catch (e) {}
+    applySidebarBlurSettings();
 }
 
 let isSidebarOpen = false;
@@ -4819,7 +4975,29 @@ function initSidebar() {
             setSidebarBlur(e.target.checked);
         });
     }
-    setSidebarBlur(isSidebarBlurEnabled());
+
+    if (rangeSidebarOpacity) {
+        rangeSidebarOpacity.addEventListener('input', (e) => {
+            setSidebarOpacity(e.target.value);
+        });
+    }
+
+    if (rangeSidebarBlur) {
+        rangeSidebarBlur.addEventListener('input', (e) => {
+            setSidebarBlurAmount(e.target.value);
+        });
+    }
+
+    document.querySelectorAll('.sidebar-preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const op = btn.dataset.opacity;
+            const bl = btn.dataset.blur;
+            if (op !== undefined) setSidebarOpacity(op);
+            if (bl !== undefined) setSidebarBlurAmount(bl);
+        });
+    });
+
+    applySidebarBlurSettings();
 
     // Обработка ухода мыши с боковой панели (с задержкой 320ms, если панель не закреплена)
     if (ideaSidebar) {
@@ -5042,6 +5220,8 @@ function exportConfig() {
                 idea_sidebar_position: localStorage.getItem('idea_sidebar_position'),
                 idea_sidebar_pinned: localStorage.getItem('idea_sidebar_pinned'),
                 sidebar_blur: localStorage.getItem('sidebar_blur'),
+                sidebar_opacity: localStorage.getItem('sidebar_opacity'),
+                sidebar_blur_amount: localStorage.getItem('sidebar_blur_amount'),
                 alias_redirect_animation: localStorage.getItem('alias_redirect_animation'),
                 onboarding_done: localStorage.getItem('onboarding_done')
             }
@@ -5088,7 +5268,7 @@ function importConfig(file) {
                 'caret_style', 'shadows_enabled', 'shadow_color', 'app_lang', 'search_engine',
                 'search_aliases', 'app_aliases', 'alias_shortcuts', 'ai_services', 'app_shortcuts',
                 'shortcut_hints_enabled', 'history_saving_enabled',
-                'idea_sidebar_position', 'idea_sidebar_pinned', 'sidebar_blur', 'alias_redirect_animation', 'onboarding_done'
+                'idea_sidebar_position', 'idea_sidebar_pinned', 'sidebar_blur', 'sidebar_opacity', 'sidebar_blur_amount', 'alias_redirect_animation', 'onboarding_done'
             ];
 
             let applied = 0;
