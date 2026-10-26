@@ -6334,22 +6334,42 @@ window.addEventListener('resize', () => {
 function exportConfig() {
     try {
         const theme = (typeof getTheme === 'function') ? getTheme() : { bg: '#000000', text: '#ffffff' };
+
+        // Сохраняем пользовательские обложки карточек галереи тем, если они были загружены
+        const themeCustomBgs = {};
+        if (typeof PRESET_THEMES !== 'undefined' && Array.isArray(PRESET_THEMES)) {
+            PRESET_THEMES.forEach(t => {
+                const img = localStorage.getItem('theme_custom_bg_' + t.id);
+                if (img) themeCustomBgs[t.id] = img;
+            });
+        }
+
         const config = {
             version: 1,
             appName: 'New Tab Extension',
             exportedAt: new Date().toISOString(),
             settings: {
+                // --- Полный охват вкладки Оформление (Appearance) ---
                 theme_settings: JSON.stringify(theme),
                 theme_bg: theme.bg,
                 theme_text: theme.text,
                 active_theme_id: localStorage.getItem('active_theme_id') || 'custom',
-                app_font: localStorage.getItem('app_font'),
-                bg_image: localStorage.getItem('bg_image'),
-                bg_blur: localStorage.getItem('bg_blur'),
-                custom_placeholder: localStorage.getItem('custom_placeholder'),
-                caret_style: localStorage.getItem('caret_style'),
-                shadows_enabled: localStorage.getItem('shadows_enabled'),
-                shadow_color: localStorage.getItem('shadow_color'),
+                theme_custom_bgs: Object.keys(themeCustomBgs).length > 0 ? themeCustomBgs : undefined,
+                app_font: localStorage.getItem('app_font') || 'Tektur',
+                bg_image: localStorage.getItem('bg_image') || null,
+                bg_blur: localStorage.getItem('bg_blur') || 'false',
+                custom_placeholder: localStorage.getItem('custom_placeholder') || '',
+                caret_style: localStorage.getItem('caret_style') || 'underline',
+                alias_redirect_animation: localStorage.getItem('alias_redirect_animation') || 'shimmer',
+                idea_sidebar_position: localStorage.getItem('idea_sidebar_position') || 'right',
+                idea_sidebar_pinned: localStorage.getItem('idea_sidebar_pinned') || 'false',
+                sidebar_blur: localStorage.getItem('sidebar_blur') || 'false',
+                sidebar_opacity: localStorage.getItem('sidebar_opacity') || '40',
+                sidebar_blur_amount: localStorage.getItem('sidebar_blur_amount') || '20',
+                shadows_enabled: localStorage.getItem('shadows_enabled') || 'false',
+                shadow_color: localStorage.getItem('shadow_color') || '#000000',
+
+                // --- Остальные вкладки ---
                 app_lang: localStorage.getItem('app_lang'),
                 search_engine: localStorage.getItem('search_engine'),
                 search_aliases: localStorage.getItem('search_aliases'),
@@ -6358,15 +6378,15 @@ function exportConfig() {
                 app_shortcuts: localStorage.getItem('app_shortcuts'),
                 shortcut_hints_enabled: localStorage.getItem('shortcut_hints_enabled'),
                 history_saving_enabled: localStorage.getItem('history_saving_enabled'),
-                idea_sidebar_position: localStorage.getItem('idea_sidebar_position'),
-                idea_sidebar_pinned: localStorage.getItem('idea_sidebar_pinned'),
-                sidebar_blur: localStorage.getItem('sidebar_blur'),
-                sidebar_opacity: localStorage.getItem('sidebar_opacity'),
-                sidebar_blur_amount: localStorage.getItem('sidebar_blur_amount'),
-                alias_redirect_animation: localStorage.getItem('alias_redirect_animation'),
                 onboarding_done: localStorage.getItem('onboarding_done')
             }
         };
+
+        // Дублируем theme_custom_bg_<id> на верхнем уровне settings для обратной совместимости
+        for (const [tId, dataUrl] of Object.entries(themeCustomBgs)) {
+            config.settings['theme_custom_bg_' + tId] = dataUrl;
+        }
+
         const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -6405,7 +6425,7 @@ function importConfig(file) {
             }
             const settings = (data.settings && typeof data.settings === 'object') ? data.settings : data;
             const validKeys = [
-                'theme_settings', 'theme_bg', 'theme_text', 'active_theme_id', 'app_font', 'bg_image', 'bg_blur', 'custom_placeholder',
+                'theme_settings', 'theme_bg', 'theme_text', 'active_theme_id', 'theme_custom_bgs', 'app_font', 'bg_image', 'bg_blur', 'custom_placeholder',
                 'caret_style', 'shadows_enabled', 'shadow_color', 'app_lang', 'search_engine',
                 'search_aliases', 'app_aliases', 'alias_shortcuts', 'ai_services', 'app_shortcuts',
                 'shortcut_hints_enabled', 'history_saving_enabled',
@@ -6414,12 +6434,32 @@ function importConfig(file) {
 
             let applied = 0;
             for (const key of validKeys) {
+                if (key === 'theme_custom_bgs') continue;
                 if (settings[key] !== undefined && settings[key] !== null) {
                     let val = settings[key];
                     if (typeof val === 'object') val = JSON.stringify(val);
                     const targetKey = key === 'app_aliases' ? 'search_aliases' : key;
                     localStorage.setItem(targetKey, String(val));
                     applied++;
+                }
+            }
+
+            // Восстановление пользовательских обложек для галереи тем
+            if (settings.theme_custom_bgs && typeof settings.theme_custom_bgs === 'object') {
+                for (const [tId, val] of Object.entries(settings.theme_custom_bgs)) {
+                    if (val) {
+                        localStorage.setItem('theme_custom_bg_' + tId, String(val));
+                        applied++;
+                    }
+                }
+            }
+            for (const key of Object.keys(settings)) {
+                if (key.startsWith('theme_custom_bg_')) {
+                    const val = settings[key];
+                    if (val) {
+                        localStorage.setItem(key, String(val));
+                        applied++;
+                    }
                 }
             }
 
@@ -6455,17 +6495,56 @@ function importConfig(file) {
                 applyTheme(getTheme());
             }
 
+            if ('active_theme_id' in settings) {
+                localStorage.setItem('active_theme_id', String(settings.active_theme_id || 'custom'));
+            }
+
             applyFont(localStorage.getItem(FONT_KEY) || 'Tektur');
-            applyBgImage(localStorage.getItem(BG_IMAGE_KEY));
-            setBgBlur(localStorage.getItem(BG_BLUR_KEY) === 'true');
+
+            // Фоновое изображение и размытие
+            if ('bg_image' in settings) {
+                if (settings.bg_image) {
+                    localStorage.setItem(BG_IMAGE_KEY, String(settings.bg_image));
+                    applyBgImage(String(settings.bg_image));
+                } else {
+                    localStorage.removeItem(BG_IMAGE_KEY);
+                    applyBgImage(null);
+                }
+            } else {
+                applyBgImage(localStorage.getItem(BG_IMAGE_KEY));
+            }
+
+            if ('bg_blur' in settings) {
+                setBgBlur(String(settings.bg_blur) === 'true');
+            } else {
+                setBgBlur(localStorage.getItem(BG_BLUR_KEY) === 'true');
+            }
+
+            if ('shadows_enabled' in settings) {
+                localStorage.setItem(SHADOWS_ENABLED_KEY, String(settings.shadows_enabled));
+            }
+            if ('shadow_color' in settings) {
+                localStorage.setItem(SHADOW_COLOR_KEY, String(settings.shadow_color));
+            }
             applyShadowSettings();
+
             setCaretStyle(getCaretStyle());
             if (typeof updateCaret === 'function') updateCaret();
 
-            if (customPlaceholderInput) {
+            // Текст плейсхолдера
+            if ('custom_placeholder' in settings) {
+                const ph = String(settings.custom_placeholder || '');
+                if (ph) {
+                    localStorage.setItem(CUSTOM_PLACEHOLDER_KEY, ph);
+                } else {
+                    localStorage.removeItem(CUSTOM_PLACEHOLDER_KEY);
+                }
+                if (customPlaceholderInput) customPlaceholderInput.value = ph;
+            } else if (customPlaceholderInput) {
                 customPlaceholderInput.value = localStorage.getItem(CUSTOM_PLACEHOLDER_KEY) || '';
             }
             updateSearchPlaceholder();
+
             if (chkHistorySaving) {
                 chkHistorySaving.checked = isHistorySavingEnabled();
             }
@@ -6476,8 +6555,25 @@ function importConfig(file) {
             if (typeof renderSearchEngines === 'function') renderSearchEngines();
             if (typeof applySearchEngine === 'function') applySearchEngine(getSearchEngine());
             if (typeof updateShortcutButtonHints === 'function') updateShortcutButtonHints();
-            if (typeof setSidebarPosition === 'function') setSidebarPosition(getSidebarPosition());
-            setSidebarBlur(localStorage.getItem(SIDEBAR_BLUR_KEY) === 'true');
+
+            if (typeof setSidebarPosition === 'function') {
+                setSidebarPosition(getSidebarPosition());
+            }
+
+            // Боковая панель: размытие и прозрачность
+            if ('sidebar_blur' in settings) {
+                localStorage.setItem(SIDEBAR_BLUR_KEY, String(settings.sidebar_blur));
+            }
+            if ('sidebar_opacity' in settings) {
+                localStorage.setItem(SIDEBAR_OPACITY_KEY, String(settings.sidebar_opacity));
+            }
+            if ('sidebar_blur_amount' in settings) {
+                localStorage.setItem(SIDEBAR_BLUR_AMOUNT_KEY, String(settings.sidebar_blur_amount));
+            }
+            if (typeof applySidebarBlurSettings === 'function') {
+                applySidebarBlurSettings();
+            }
+
             setAliasRedirectAnimation(getAliasRedirectAnimation(), false);
             if (typeof renderThemeGallery === 'function') renderThemeGallery();
 
