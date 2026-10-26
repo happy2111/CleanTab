@@ -11,10 +11,10 @@ Modern browser start pages are frequently encumbered by telemetry, resource-heav
 ## Key Features
 
 ### Input Interface and Search Resolution
-CleanTab provides a unified, borderless input field supporting multi-line query composition, 2D cursor projection, and ghost-text auto-completion derived from historical inputs. The search dispatcher supports configurable search engines (including Google, DuckDuckGo, Brave, Bing, Yandex, and Ecosia) and deterministic alias expansion for instantaneous local or remote URL routing.
+CleanTab provides a unified, borderless input field supporting multi-line query composition, 2D cursor projection, and ghost-text auto-completion derived from historical inputs. The search dispatcher supports configurable search engines with customizable options and deterministic alias expansion for instantaneous local or remote URL routing.
 
 ### AI Dispatch and Assistant Routing
-Direct keyboard routing to major AI chat platforms. Configured out of the box with `!ai <prompt>` pointing to ChatGPT, CleanTab supports custom AI services, presets for Claude, DeepSeek, and Perplexity, as well as single-key autocompletion (`Tab`). All prompts deep-link directly into the chat session without external telemetry.
+Direct keyboard routing to AI assistant platforms. CleanTab supports configurable AI service shortcuts, custom prompts, and single-key autocompletion (Tab). All prompts deep-link directly into the chat session without external telemetry.
 
 ### Customizable Alias Redirect Animations
 Deterministic alias routing features five distinct transition styles configured under Appearance settings:

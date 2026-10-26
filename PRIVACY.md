@@ -35,7 +35,7 @@ CleanTab complies strictly with Chrome Web Store Manifest V3 policies. The Exten
 ---
 
 ### 5. Third-Party Web Searches
-When you submit a search query, CleanTab routes your query directly to your selected search engine (such as Google, DuckDuckGo, Brave, Bing, Yandex, or Ecosia) by opening their public search URL in your browser. These requests are subject to the privacy policies of the respective search engine providers.
+When you submit a search query, CleanTab routes your query directly to your selected search engine by opening their public search URL in your browser. These requests are subject to the privacy policies of the respective search engine providers.
 
 ---
 

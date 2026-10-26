@@ -131,6 +131,21 @@ const customBgText = document.getElementById('custom-bg-text');
 const customTextText = document.getElementById('custom-text-text');
 const langTitle = document.getElementById('lang-title');
 
+const subtabGalleryBtn = document.getElementById('subtab-gallery-btn');
+const subtabCustomBtn = document.getElementById('subtab-custom-btn');
+const btnExportTheme = document.getElementById('btn-export-theme');
+const btnImportTheme = document.getElementById('btn-import-theme');
+const themeImportInput = document.getElementById('theme-import-input');
+const themeCardBgInput = document.getElementById('theme-card-bg-input');
+const themeStatusMsg = document.getElementById('theme-status-msg');
+const themeViewGallery = document.getElementById('theme-view-gallery');
+const themeViewCustom = document.getElementById('theme-view-custom');
+const themeCardsGrid = document.getElementById('theme-cards-grid');
+const labelSubtabGallery = document.getElementById('label-subtab-gallery');
+const labelSubtabCustom = document.getElementById('label-subtab-custom');
+const labelExportTheme = document.getElementById('label-export-theme');
+const labelImportTheme = document.getElementById('label-import-theme');
+
 const themeBgImageLabel = document.getElementById('theme-bg-image-label');
 const bgImageInput = document.getElementById('bg-image-input');
 const btnUploadBgImage = document.getElementById('btn-upload-bg-image');
@@ -270,6 +285,19 @@ const translations = {
         themeTextLabel: "Text & cursor color:",
         themeCustom: "Custom",
         themeReset: "Reset to default colors",
+        themeGallery: "Themes Gallery",
+        themeCustomizer: "Customizer",
+        themeExport: "Export Theme",
+        themeImport: "Import Theme",
+        themeApply: "Apply",
+        themeActive: "Active",
+        themeImage: "Background",
+        themeRemoveImage: "Remove background",
+        themeExportSuccess: "Theme exported to JSON!",
+        themeImportSuccess: "Theme imported & applied!",
+        themeImportError: "Invalid theme file",
+        themeApplySuccess: "Theme applied!",
+        themeImageUpdated: "Background image updated!",
         sidebarPosLabel: "Sidebar position:",
         sidebarBlurLabel: "Blur & transparent effect",
         posLeft: "Left",
@@ -412,6 +440,19 @@ const translations = {
         themeTextLabel: "Matn va kursor rangi:",
         themeCustom: "Boshqa",
         themeReset: "Standart ranglarga qaytarish",
+        themeGallery: "Mavzular galereyasi",
+        themeCustomizer: "O'z sozlamangiz",
+        themeExport: "Mavzuni eksport",
+        themeImport: "Mavzuni import",
+        themeApply: "Qo'llash",
+        themeActive: "Faol",
+        themeImage: "Fon rasmi",
+        themeRemoveImage: "Fonni o'chirish",
+        themeExportSuccess: "Mavzu JSON formatda eksport qilindi!",
+        themeImportSuccess: "Mavzu import qilindi va qo'llandi!",
+        themeImportError: "Yaroqsiz mavzu fayli",
+        themeApplySuccess: "Mavzu qo'llandi!",
+        themeImageUpdated: "Fon rasmi yangilandi!",
         sidebarPosLabel: "Yon panel joylashuvi:",
         sidebarBlurLabel: "Xiralashtirish va shaffoflik effekti",
         posLeft: "Chap",
@@ -552,6 +593,19 @@ const translations = {
         themeTextLabel: "Цвет текста и курсора:",
         themeCustom: "Свой",
         themeReset: "Сбросить цвета по умолчанию",
+        themeGallery: "Галерея тем",
+        themeCustomizer: "Своя настройка",
+        themeExport: "Экспорт темы",
+        themeImport: "Импорт темы",
+        themeApply: "Применить",
+        themeActive: "Активна",
+        themeImage: "Фон",
+        themeRemoveImage: "Удалить фон",
+        themeExportSuccess: "Тема экспортирована в JSON!",
+        themeImportSuccess: "Тема импортирована и применена!",
+        themeImportError: "Неверный файл темы",
+        themeApplySuccess: "Тема применена!",
+        themeImageUpdated: "Фоновая картинка обновлена!",
         sidebarPosLabel: "Расположение панели:",
         sidebarBlurLabel: "Размытие и прозрачность (Blur)",
         posLeft: "Слева",
@@ -1826,9 +1880,15 @@ function setLanguage(lang) {
         card.classList.toggle('active', card.dataset.lang === lang);
     });
 
+    if (labelSubtabGallery) labelSubtabGallery.textContent = t.themeGallery || "Themes Gallery";
+    if (labelSubtabCustom) labelSubtabCustom.textContent = t.themeCustomizer || "Customizer";
+    if (labelExportTheme) labelExportTheme.textContent = t.themeExport || "Export";
+    if (labelImportTheme) labelImportTheme.textContent = t.themeImport || "Import";
+
     renderHistory();
     renderAliases();
     if (typeof renderAiServices === 'function') renderAiServices();
+    if (typeof renderThemeGallery === 'function') renderThemeGallery();
     if (typeof renderShortcuts === 'function') renderShortcuts();
     if (typeof renderSearchEngines === 'function') renderSearchEngines();
     if (typeof updateSearchPlaceholder === 'function') updateSearchPlaceholder();
@@ -2496,7 +2556,10 @@ function updateModalInfoBadge() {
 
     const activeContent = [tabHistoryContent, tabEngineContent, tabAliasContent, tabAiContent, tabShortcutsContent, tabThemeContent, tabLangContent, tabBackupContent].find(c => c && c.classList.contains('active'));
 
-    if (activeContent === tabAliasContent) {
+    if (activeContent === tabHistoryContent) {
+        modalInfoBadge.style.display = 'inline-flex';
+        modalInfoTooltip.innerHTML = t.historyDesc;
+    } else if (activeContent === tabAliasContent) {
         modalInfoBadge.style.display = 'inline-flex';
         modalInfoTooltip.innerHTML = t.aliasDesc;
     } else if (activeContent === tabAiContent) {
