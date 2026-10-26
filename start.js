@@ -4768,9 +4768,75 @@ function resetBlink() {
     caret.style.animation = 'caret-blink 0.8s infinite';
 }
 
-// Обработка клавиш Enter, Tab, ArrowRight и Escape
+// Навигация по истории поиска стрелками вверх/вниз (как в терминале/CLI)
+let historyNavIndex = -1;
+let historyNavSavedQuery = '';
+let isNavigatingHistory = false;
+
+// Обработка клавиш Enter, Tab, ArrowRight, ArrowUp, ArrowDown и Escape
 input.addEventListener('keydown', (e) => {
+    // Навигация по истории поисков стрелкой ВВЕРХ
+    if (e.key === 'ArrowUp') {
+        const history = typeof getHistory === 'function' ? getHistory() : [];
+        if (history && history.length > 0) {
+            const val = input.value;
+            const isMultiline = val.includes('\n');
+            const caretBefore = val.slice(0, input.selectionStart || 0);
+            // Если текст многострочный, но курсор на первой строке, или текст однострочный
+            if (!isMultiline || !caretBefore.includes('\n')) {
+                if (historyNavIndex === -1) {
+                    historyNavSavedQuery = val;
+                }
+                if (historyNavIndex < history.length - 1) {
+                    e.preventDefault();
+                    historyNavIndex++;
+                    isNavigatingHistory = true;
+                    input.value = history[historyNavIndex];
+                    isNavigatingHistory = false;
+                    input.selectionStart = input.selectionEnd = input.value.length;
+                    autoResizeInput();
+                    updateSuggestion();
+                    updateCaret();
+                    resetBlink();
+                    return;
+                } else if (historyNavIndex === history.length - 1) {
+                    e.preventDefault();
+                    return;
+                }
+            }
+        }
+    }
+
+    // Навигация по истории поисков стрелкой ВНИЗ (возврат к более новым или исходному запросу)
+    if (e.key === 'ArrowDown') {
+        if (historyNavIndex > -1) {
+            const val = input.value;
+            const isMultiline = val.includes('\n');
+            const caretAfter = val.slice(input.selectionEnd || 0);
+            if (!isMultiline || !caretAfter.includes('\n')) {
+                e.preventDefault();
+                historyNavIndex--;
+                isNavigatingHistory = true;
+                if (historyNavIndex === -1) {
+                    input.value = historyNavSavedQuery;
+                } else {
+                    const history = typeof getHistory === 'function' ? getHistory() : [];
+                    input.value = history[historyNavIndex] || '';
+                }
+                isNavigatingHistory = false;
+                input.selectionStart = input.selectionEnd = input.value.length;
+                autoResizeInput();
+                updateSuggestion();
+                updateCaret();
+                resetBlink();
+                return;
+            }
+        }
+    }
+
     if (e.key === 'Enter' && !e.shiftKey) {
+        historyNavIndex = -1;
+        historyNavSavedQuery = '';
         e.preventDefault();
         if (form) {
             if (form.requestSubmit) {
@@ -4799,6 +4865,20 @@ input.addEventListener('keydown', (e) => {
     }
 
     if (e.key === 'Escape') {
+        if (historyNavIndex > -1) {
+            e.preventDefault();
+            isNavigatingHistory = true;
+            input.value = historyNavSavedQuery;
+            isNavigatingHistory = false;
+            historyNavIndex = -1;
+            historyNavSavedQuery = '';
+            input.selectionStart = input.selectionEnd = input.value.length;
+            autoResizeInput();
+            updateSuggestion();
+            updateCaret();
+            resetBlink();
+            return;
+        }
         if (currentSuggestion) {
             currentSuggestion = null;
             ghostTyped.textContent = '';
@@ -5180,6 +5260,10 @@ document.addEventListener('keydown', (e) => {
 // Слушатели событий ввода
 ['input', 'keyup', 'click', 'mouseup', 'select', 'focus'].forEach(event => {
     input.addEventListener(event, () => {
+        if (event === 'input' && !isNavigatingHistory) {
+            historyNavIndex = -1;
+            historyNavSavedQuery = '';
+        }
         autoResizeInput();
         updateSuggestion();
         updateCaret();
@@ -5188,6 +5272,8 @@ document.addEventListener('keydown', (e) => {
 });
 
 input.addEventListener('blur', () => {
+    historyNavIndex = -1;
+    historyNavSavedQuery = '';
     if (caret) caret.style.display = 'none';
     if (ghostTyped && ghostSuffix) {
         ghostTyped.textContent = '';
@@ -5279,6 +5365,8 @@ function getUrl(val) {
 }
 
 form.addEventListener('submit', (e) => {
+    historyNavIndex = -1;
+    historyNavSavedQuery = '';
     let query = input.value.trim();
     if (!query) {
         e.preventDefault();
