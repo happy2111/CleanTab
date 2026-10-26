@@ -316,6 +316,10 @@ const translations = {
         onboardingStep3: "Type to search or go to any URL",
         onboardingStep4: "Hover the edge to open your bookmarks",
         tabBackup: "Backup",
+        exportCardTitle: "Export Backup",
+        exportCardDesc: "Download all your settings, themes, shortcuts, and aliases as a portable JSON file.",
+        importCardTitle: "Restore Backup",
+        importCardDesc: "Restore your configuration from a JSON file. All preferences apply instantly.",
         exportBtn: "Export config",
         importBtn: "Import config",
         importSuccess: "Config imported!",
@@ -452,6 +456,10 @@ const translations = {
         onboardingStep3: "Qidirish yoki istalgan URL'ga o'tish uchun yozing",
         onboardingStep4: "Xatcho'plarni ochish uchun chetga olib boring",
         tabBackup: "Zahira",
+        exportCardTitle: "Zahirani eksport qilish",
+        exportCardDesc: "Barcha sozlamalar, mavzular va taxalluslarni JSON fayli sifatida yuklab oling.",
+        importCardTitle: "Zahiradan tiklash",
+        importCardDesc: "Sozlamalarni JSON faylidan tiklang. Barcha parametrlar bir zumda qo'llaniladi.",
         exportBtn: "Konfigni eksport qilish",
         importBtn: "Konfigni import qilish",
         importSuccess: "Konfig import qilindi!",
@@ -588,6 +596,10 @@ const translations = {
         onboardingStep3: "Введите запрос для поиска или перехода по URL",
         onboardingStep4: "Наведите на край, чтобы открыть закладки",
         tabBackup: "Резервная копия",
+        exportCardTitle: "Экспорт резервной копии",
+        exportCardDesc: "Скачайте все ваши настройки, темы, горячие клавиши и алиасы в виде JSON файла.",
+        importCardTitle: "Восстановление из копии",
+        importCardDesc: "Восстановите конфигурацию из JSON файла. Все параметры применятся мгновенно.",
         exportBtn: "Экспортировать конфиг",
         importBtn: "Импортировать конфиг",
         importSuccess: "Конфиг импортирован!",
@@ -1601,6 +1613,14 @@ function setLanguage(lang) {
     if (themeShadowsTitle) themeShadowsTitle.textContent = t.shadowsLabel;
     if (labelShadowsEnabled) labelShadowsEnabled.textContent = t.shadowsEnabled;
     if (shadowColorLabel) shadowColorLabel.textContent = t.shadowColorLabel;
+    const titleExportCard = document.getElementById('title-export-card');
+    const descExportCard = document.getElementById('desc-export-card');
+    const titleImportCard = document.getElementById('title-import-card');
+    const descImportCard = document.getElementById('desc-import-card');
+    if (titleExportCard) titleExportCard.textContent = t.exportCardTitle || "Export Backup";
+    if (descExportCard) descExportCard.textContent = t.exportCardDesc || "Download all your settings, themes, shortcuts, and aliases as a portable JSON file.";
+    if (titleImportCard) titleImportCard.textContent = t.importCardTitle || "Restore Backup";
+    if (descImportCard) descImportCard.textContent = t.importCardDesc || "Restore your configuration from a JSON file. All preferences apply instantly.";
     if (labelExportBtn) labelExportBtn.textContent = t.exportBtn;
     if (labelImportBtn) labelImportBtn.textContent = t.importBtn;
     if (customBgText) customBgText.textContent = t.themeCustom;
