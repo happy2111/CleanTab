@@ -1513,6 +1513,126 @@ const translations = {
     }
 };
 
+
+// Динамическое внедрение переводов для первого запуска и гида
+const welcomeI18n = {
+    "en": {
+        "welcomeTitle": "Welcome to CleanTab",
+        "welcomeSubtitle": "Choose your preferred interface language to continue",
+        "welcomeContinue": "Continue",
+        "resetFirstRunTitle": "First-Run & Welcome Tour",
+        "resetFirstRunDesc": "Reset the first-run state and reload the page to choose your language and replay the interactive guide.",
+        "resetFirstRunBtn": "Reset & Restart Tour",
+        "langTourHint": "Want to replay the welcome tour and first-run setup?",
+        "langTourBtn": "Replay Tour"
+    },
+    "uz": {
+        "welcomeTitle": "CleanTab-ga xush kelibsiz",
+        "welcomeSubtitle": "Davom etish uchun interfeys tilini tanlang",
+        "welcomeContinue": "Davom etish",
+        "resetFirstRunTitle": "Birinchi ishga tushirish va qo'llanma",
+        "resetFirstRunDesc": "Tilni tanlash va tanishtiruv qo'llanmasini qayta ko'rish uchun birinchi ishga tushirishni tiklash.",
+        "resetFirstRunBtn": "Qayta tiklash va boshlash",
+        "langTourHint": "Tanishtiruv qo'llanmasini yana ko'rishni xohlaysizmi?",
+        "langTourBtn": "Qo'llanmani ko'rish"
+    },
+    "ru": {
+        "welcomeTitle": "Добро пожаловать в CleanTab",
+        "welcomeSubtitle": "Выберите язык интерфейса для продолжения",
+        "welcomeContinue": "Продолжить",
+        "resetFirstRunTitle": "Первый запуск и гид",
+        "resetFirstRunDesc": "Сбросить статус первого запуска и перезагрузить страницу для выбора языка и повтора интерактивного гида.",
+        "resetFirstRunBtn": "Сбросить и перезапустить",
+        "langTourHint": "Хотите пройти ознакомительный тур ещё раз?",
+        "langTourBtn": "Пройти тур"
+    },
+    "es": {
+        "welcomeTitle": "Bienvenido a CleanTab",
+        "welcomeSubtitle": "Elija el idioma de la interfaz para continuar",
+        "welcomeContinue": "Continuar",
+        "resetFirstRunTitle": "Primer inicio y guía",
+        "resetFirstRunDesc": "Restablecer la configuración inicial y recargar la página para elegir idioma y ver la guía.",
+        "resetFirstRunBtn": "Restablecer y reiniciar",
+        "langTourHint": "¿Desea volver a ver el recorrido introductorio?",
+        "langTourBtn": "Repetir recorrido"
+    },
+    "pt": {
+        "welcomeTitle": "Bem-vindo ao CleanTab",
+        "welcomeSubtitle": "Escolha o idioma da interface para continuar",
+        "welcomeContinue": "Continuar",
+        "resetFirstRunTitle": "Primeira inicialização e guia",
+        "resetFirstRunDesc": "Redefinir a primeira execução e recarregar para escolher o idioma e rever o guia.",
+        "resetFirstRunBtn": "Redefinir e reiniciar",
+        "langTourHint": "Deseja ver o tutorial introdutório novamente?",
+        "langTourBtn": "Repetir tutorial"
+    },
+    "de": {
+        "welcomeTitle": "Willkommen bei CleanTab",
+        "welcomeSubtitle": "Wählen Sie Ihre bevorzugte Sprache, um fortzufahren",
+        "welcomeContinue": "Weiter",
+        "resetFirstRunTitle": "Erster Start & Einführung",
+        "resetFirstRunDesc": "Ersteinrichtung zurücksetzen und Seite neu laden, um Sprache zu wählen und die Tour zu wiederholen.",
+        "resetFirstRunBtn": "Zurücksetzen & Neu starten",
+        "langTourHint": "Möchten Sie die Einführungstour noch einmal ansehen?",
+        "langTourBtn": "Tour wiederholen"
+    },
+    "zh": {
+        "welcomeTitle": "欢迎使用 CleanTab",
+        "welcomeSubtitle": "选择您的首选界面语言以继续",
+        "welcomeContinue": "继续",
+        "resetFirstRunTitle": "首次启动与入门向导",
+        "resetFirstRunDesc": "重置首次启动状态并刷新页面，以重新选择语言并重新播放引导指南。",
+        "resetFirstRunBtn": "重置并重新开始",
+        "langTourHint": "想要再次查看功能引导吗？",
+        "langTourBtn": "重新播放向导"
+    },
+    "ja": {
+        "welcomeTitle": "CleanTab へようこそ",
+        "welcomeSubtitle": "続行するには言語を選択してください",
+        "welcomeContinue": "次へ",
+        "resetFirstRunTitle": "初回起動とガイドツアー",
+        "resetFirstRunDesc": "初回設定をリセットしてページを再読み込みし、言語の選択とインタラクティブガイドを再開します。",
+        "resetFirstRunBtn": "リセットしてツアーを再開",
+        "langTourHint": "入門ガイドツアーをもう一度ご覧になりますか？",
+        "langTourBtn": "ツアーを再開"
+    },
+    "ko": {
+        "welcomeTitle": "CleanTab에 오신 것을 환영합니다",
+        "welcomeSubtitle": "계속하려면 인터페이스 언어를 선택하세요",
+        "welcomeContinue": "계속",
+        "resetFirstRunTitle": "첫 실행 및 안내 가이드",
+        "resetFirstRunDesc": "첫 실행 설정을 초기화하고 페이지를 새로고침하여 언어를 선택하고 안내 가이드를 다시 실행합니다.",
+        "resetFirstRunBtn": "초기화 및 가이드 다시 시작",
+        "langTourHint": "소개 둘러보기를 다시 보시겠습니까?",
+        "langTourBtn": "가이드 다시 보기"
+    },
+    "ar": {
+        "welcomeTitle": "مرحبًا بك في CleanTab",
+        "welcomeSubtitle": "اختر لغة الواجهة المفضلة للمتابعة",
+        "welcomeContinue": "متابعة",
+        "resetFirstRunTitle": "التشغيل الأول والدليل التفاعلي",
+        "resetFirstRunDesc": "إعادة تعيين حالة التشغيل الأول وإعادة تحميل الصفحة لاختيار اللغة وتشغيل الدليل مجددًا.",
+        "resetFirstRunBtn": "إعادة الضبط والتشغيل",
+        "langTourHint": "هل ترغب في مشاهدة الجولة التعريفية مرة أخرى؟",
+        "langTourBtn": "إعادة الجولة"
+    },
+    "hi": {
+        "welcomeTitle": "CleanTab में आपका स्वागत है",
+        "welcomeSubtitle": "जारी रखने के लिए अपनी पसंदीदा भाषा चुनें",
+        "welcomeContinue": "जारी रखें",
+        "resetFirstRunTitle": "पहला रन और गाइड",
+        "resetFirstRunDesc": "भाषा चुनने और इंटरैक्टिव गाइड को फिर से चलाने के लिए पहला रन रीसेट करें और पेज को रीलोड करें।",
+        "resetFirstRunBtn": "रीसेट और पुनः प्रारंभ",
+        "langTourHint": "क्या आप परिचयात्मक गाइड को फिर से देखना चाहते हैं?",
+        "langTourBtn": "गाइड दोहराएं"
+    }
+};
+for (const [l, strings] of Object.entries(welcomeI18n)) {
+    if (translations[l]) {
+        Object.assign(translations[l], strings);
+    }
+}
+
 function getLanguage() {
     return localStorage.getItem(LANG_KEY) || 'en'; // По умолчанию 'en'
 }
@@ -1621,6 +1741,23 @@ function setLanguage(lang) {
     if (descExportCard) descExportCard.textContent = t.exportCardDesc || "Download all your settings, themes, shortcuts, and aliases as a portable JSON file.";
     if (titleImportCard) titleImportCard.textContent = t.importCardTitle || "Restore Backup";
     if (descImportCard) descImportCard.textContent = t.importCardDesc || "Restore your configuration from a JSON file. All preferences apply instantly.";
+    const welcomeTitle = document.getElementById('welcome-title');
+    const welcomeSubtitle = document.getElementById('welcome-subtitle');
+    const labelWelcomeContinue = document.getElementById('label-welcome-continue');
+    const titleFirstrunCard = document.getElementById('title-firstrun-card');
+    const descFirstrunCard = document.getElementById('desc-firstrun-card');
+    const labelResetFirstRunBtn = document.getElementById('label-reset-first-run-btn');
+    const descLangTourHint = document.getElementById('desc-lang-tour-hint');
+    const labelLangRestartTourBtn = document.getElementById('label-lang-restart-tour-btn');
+
+    if (welcomeTitle) welcomeTitle.textContent = t.welcomeTitle || "Welcome to CleanTab";
+    if (welcomeSubtitle) welcomeSubtitle.textContent = t.welcomeSubtitle || "Choose your preferred language to get started";
+    if (labelWelcomeContinue) labelWelcomeContinue.textContent = t.welcomeContinue || "Continue";
+    if (titleFirstrunCard) titleFirstrunCard.textContent = t.resetFirstRunTitle || "First-Run & Welcome Tour";
+    if (descFirstrunCard) descFirstrunCard.textContent = t.resetFirstRunDesc || "Reset the first-run state and reload the page to choose your language and replay the interactive guide.";
+    if (labelResetFirstRunBtn) labelResetFirstRunBtn.textContent = t.resetFirstRunBtn || "Reset & Restart Tour";
+    if (descLangTourHint) descLangTourHint.textContent = t.langTourHint || "Want to replay the welcome tour and first-run setup?";
+    if (labelLangRestartTourBtn) labelLangRestartTourBtn.textContent = t.langTourBtn || "Replay Tour";
     if (labelExportBtn) labelExportBtn.textContent = t.exportBtn;
     if (labelImportBtn) labelImportBtn.textContent = t.importBtn;
     if (customBgText) customBgText.textContent = t.themeCustom;
@@ -5164,10 +5301,11 @@ function initSidebar() {
 
         ideaSidebar.addEventListener('mouseleave', () => {
             if (isSidebarPinned) return;
-            if (sidebarLeaveTimer) clearTimeout(sidebarLeaveTimer);
-            sidebarLeaveTimer = setTimeout(() => {
-                closeSidebar();
-            }, 320);
+            if (sidebarLeaveTimer) {
+                clearTimeout(sidebarLeaveTimer);
+                sidebarLeaveTimer = null;
+            }
+            closeSidebar();
         });
     }
 
@@ -5204,6 +5342,87 @@ initSidebar();
 // ==========================================
 const ONBOARDING_KEY = 'onboarding_done';
 let currentOnboardingStep = 1;
+
+
+// ==========================================
+// 12a. Логика первого запуска (Выбор языка + Интерактивный гид)
+// ==========================================
+function openWelcomeLangModal() {
+    const welcomeModal = document.getElementById('welcome-lang-modal');
+    if (!welcomeModal) {
+        startOnboarding();
+        return;
+    }
+    const currentLang = (typeof getLanguage === 'function') ? getLanguage() : 'en';
+    document.querySelectorAll('.welcome-lang-card').forEach(c => {
+        if (c.dataset.lang === currentLang) {
+            c.classList.add('active');
+        } else {
+            c.classList.remove('active');
+        }
+    });
+    welcomeModal.style.display = 'flex';
+    requestAnimationFrame(() => {
+        welcomeModal.classList.add('active');
+    });
+}
+
+function closeWelcomeLangModal() {
+    const welcomeModal = document.getElementById('welcome-lang-modal');
+    if (!welcomeModal) return;
+    welcomeModal.classList.remove('active');
+    setTimeout(() => {
+        welcomeModal.style.display = 'none';
+    }, 240);
+}
+
+const btnWelcomeContinue = document.getElementById('btn-welcome-continue');
+if (btnWelcomeContinue) {
+    btnWelcomeContinue.addEventListener('click', () => {
+        closeWelcomeLangModal();
+        setTimeout(() => {
+            startOnboarding();
+        }, 260);
+    });
+}
+
+document.addEventListener('keydown', (e) => {
+    const welcomeModal = document.getElementById('welcome-lang-modal');
+    if (welcomeModal && welcomeModal.style.display !== 'none' && welcomeModal.classList.contains('active')) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (btnWelcomeContinue) btnWelcomeContinue.click();
+        }
+    }
+});
+
+document.querySelectorAll('.welcome-lang-card').forEach(card => {
+    card.addEventListener('click', () => {
+        const lang = card.dataset.lang;
+        document.querySelectorAll('.welcome-lang-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        if (typeof setLanguage === 'function') {
+            setLanguage(lang);
+        }
+    });
+});
+
+function resetFirstRunAndReload() {
+    try {
+        localStorage.removeItem(ONBOARDING_KEY);
+    } catch (e) {}
+    window.location.reload();
+}
+
+const btnResetFirstRun = document.getElementById('btn-reset-first-run');
+if (btnResetFirstRun) {
+    btnResetFirstRun.addEventListener('click', resetFirstRunAndReload);
+}
+
+const btnLangRestartTour = document.getElementById('btn-lang-restart-tour');
+if (btnLangRestartTour) {
+    btnLangRestartTour.addEventListener('click', resetFirstRunAndReload);
+}
 
 function updateOnboardingStep(step) {
     if (!onboardingOverlay || !onboardingSpotlight || !onboardingCard) return;
@@ -5502,6 +5721,6 @@ if (chkHistorySaving) {
 
 if (!localStorage.getItem(ONBOARDING_KEY)) {
     setTimeout(() => {
-        startOnboarding();
+        openWelcomeLangModal();
     }, 450);
 }

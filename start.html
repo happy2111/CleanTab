@@ -52,7 +52,7 @@
             justify-content: center;
             align-items: center;
             box-sizing: border-box;
-            transition: margin-right 0.24s cubic-bezier(0.16, 1, 0.3, 1), margin-left 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: margin-right 0.18s cubic-bezier(0.16, 1, 0.3, 1), margin-left 0.18s cubic-bezier(0.16, 1, 0.3, 1);
             overflow: hidden;
         }
         body.sidebar-open .main-content {
@@ -2155,6 +2155,158 @@
             pointer-events: auto !important;
         }
 
+        
+        /* ==========================================
+           Модальное окно выбора языка первого запуска (Welcome Modal)
+           ========================================== */
+        .welcome-container {
+            width: 90%;
+            max-width: 580px;
+            background: rgba(16, 18, 22, 0.78);
+            backdrop-filter: blur(35px) saturate(190%);
+            -webkit-backdrop-filter: blur(35px) saturate(190%);
+            border: none !important;
+            outline: none !important;
+            border-radius: 20px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.75);
+            padding: 30px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-sizing: border-box;
+            transform: scale(0.96) translateY(10px);
+            opacity: 0;
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+        }
+        .modal-overlay.active .welcome-container {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+        .welcome-header {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            text-align: left;
+        }
+        .welcome-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .welcome-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #00f0ff;
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.8);
+        }
+        .welcome-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0;
+            letter-spacing: -0.3px;
+            line-height: 1.2;
+        }
+        .welcome-subtitle {
+            font-size: 13.5px;
+            color: rgba(255, 255, 255, 0.52);
+            margin: 0;
+            line-height: 1.45;
+        }
+        .welcome-lang-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(126px, 1fr));
+            gap: 8px;
+            max-height: 240px;
+            overflow-y: auto;
+            padding: 2px;
+            scrollbar-width: thin;
+        }
+        .welcome-lang-card {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.16s ease;
+            color: rgba(255, 255, 255, 0.7);
+            font-family: inherit;
+            outline: none;
+            box-sizing: border-box;
+            text-align: left;
+        }
+        .welcome-lang-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.14);
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+        .welcome-lang-card.active {
+            background: rgba(255, 255, 255, 0.14);
+            border-color: rgba(255, 255, 255, 0.35);
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+        }
+        .welcome-lang-code {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 0.5px;
+        }
+        .welcome-lang-card.active .welcome-lang-code {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+        .welcome-lang-name {
+            font-size: 13px;
+            font-weight: 500;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .welcome-lang-check {
+            width: 14px;
+            height: 14px;
+            opacity: 0;
+            color: #00f0ff;
+            flex-shrink: 0;
+            transition: opacity 0.15s ease;
+        }
+        .welcome-lang-card.active .welcome-lang-check {
+            opacity: 1;
+        }
+        .welcome-footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        #btn-welcome-continue {
+            height: 40px;
+            padding: 0 22px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13.5px;
+            font-weight: 600;
+            border-radius: 9px;
+            cursor: pointer;
+        }
+
         /* ==========================================
            Modern Transparent Sidebar (Bookmarks & Tabs)
            ========================================== */
@@ -2201,7 +2353,7 @@
             flex-direction: column;
             z-index: 90;
             transform: translateX(calc(100% + 24px));
-            transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease, color 0.25s ease;
+            transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease, color 0.25s ease;
             box-shadow: none;
             user-select: none;
             color: var(--text-color, #ffffff);
@@ -3144,6 +3296,15 @@
                                 <polyline points="20 6 9 17 4 12"></polyline>
                             </svg>
                         </button>
+                        <div style="margin-top: 18px; padding: 14px 18px; background: rgba(255, 255, 255, 0.03); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 14px; box-sizing: border-box;">
+                            <div style="font-size: 12.5px; color: rgba(255, 255, 255, 0.55);">
+                                <span id="desc-lang-tour-hint">Want to replay the welcome tour and first-run setup?</span>
+                            </div>
+                            <button id="btn-lang-restart-tour" class="btn-secondary" type="button" style="height: 34px; padding: 0 14px; font-size: 12px; font-weight: 600; border-radius: 7px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                                <span id="label-lang-restart-tour-btn">Replay Tour</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -3183,11 +3344,130 @@
                             </div>
                         </div>
                         <div id="backup-status-msg" style="font-size: 13px; font-weight: 500; min-height: 20px; margin-top: 14px; transition: color 0.2s ease;"></div>
+
+                        <div style="background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 18px 20px; margin-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; box-sizing: border-box;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" style="color: #ffffff;"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+                                    <span id="title-firstrun-card" style="font-size: 15px; font-weight: 600; color: #ffffff;">First-Run & Welcome Tour</span>
+                                </div>
+                                <div id="desc-firstrun-card" style="font-size: 12.5px; color: rgba(255, 255, 255, 0.5); line-height: 1.45;">
+                                    Reset first-run setup to pick your language and replay the interactive guide.
+                                </div>
+                            </div>
+                            <button id="btn-reset-first-run" class="btn-secondary" type="button" style="height: 40px; padding: 0 16px; white-space: nowrap; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; flex-shrink: 0; display: inline-flex; align-items: center; gap: 8px;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                                <span id="label-reset-first-run-btn">Reset & Restart Tour</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    </div>
+
+    <!-- Модальное окно выбора языка при первом запуске (Welcome Language Modal) -->
+    <div id="welcome-lang-modal" class="modal-overlay" style="display: none; z-index: 10002;">
+        <div class="welcome-container">
+            <div class="welcome-header">
+                <div class="welcome-brand">
+                    <span class="welcome-dot"></span>
+                    <span>CleanTab</span>
+                </div>
+                <h2 id="welcome-title" class="welcome-title">Welcome to CleanTab</h2>
+                <p id="welcome-subtitle" class="welcome-subtitle">Choose your preferred interface language to continue</p>
+            </div>
+
+            <div class="welcome-lang-grid" id="welcome-lang-grid">
+                <button class="welcome-lang-card active" data-lang="en" type="button">
+                    <span class="welcome-lang-code">EN</span>
+                    <span class="welcome-lang-name">English</span>
+                    <svg class="welcome-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </button>
+                <button class="welcome-lang-card" data-lang="uz" type="button">
+                    <span class="welcome-lang-code">UZ</span>
+                    <span class="welcome-lang-name">O'zbekcha</span>
+                    <svg class="welcome-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </button>
+                <button class="welcome-lang-card" data-lang="ru" type="button">
+                    <span class="welcome-lang-code">RU</span>
+                    <span class="welcome-lang-name">Русский</span>
+                    <svg class="welcome-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </button>
+                <button class="welcome-lang-card" data-lang="es" type="button">
+                    <span class="welcome-lang-code">ES</span>
+                    <span class="welcome-lang-name">Español</span>
+                    <svg class="welcome-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </button>
+                <button class="welcome-lang-card" data-lang="pt" type="button">
+                    <span class="welcome-lang-code">PT</span>
+                    <span class="welcome-lang-name">Português</span>
+                    <svg class="welcome-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </button>
+                <button class="welcome-lang-card" data-lang="de" type="button">
+                    <span class="welcome-lang-code">DE</span>
+                    <span class="welcome-lang-name">Deutsch</span>
+                    <svg class="welcome-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </button>
+                <button class="welcome-lang-card" data-lang="zh" type="button">
+                    <span class="welcome-lang-code">ZH</span>
+                    <span class="welcome-lang-name">简体中文</span>
+                    <svg class="welcome-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </button>
+                <button class="welcome-lang-card" data-lang="ja" type="button">
+                    <span class="welcome-lang-code">JA</span>
+                    <span class="welcome-lang-name">日本語</span>
+                    <svg class="welcome-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </button>
+                <button class="welcome-lang-card" data-lang="ko" type="button">
+                    <span class="welcome-lang-code">KO</span>
+                    <span class="welcome-lang-name">한국어</span>
+                    <svg class="welcome-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </button>
+                <button class="welcome-lang-card" data-lang="ar" type="button">
+                    <span class="welcome-lang-code">AR</span>
+                    <span class="welcome-lang-name">العربية</span>
+                    <svg class="welcome-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </button>
+                <button class="welcome-lang-card" data-lang="hi" type="button">
+                    <span class="welcome-lang-code">HI</span>
+                    <span class="welcome-lang-name">हिन्दी</span>
+                    <svg class="welcome-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="welcome-footer">
+                <button id="btn-welcome-continue" class="btn-primary" type="button">
+                    <span id="label-welcome-continue">Continue</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Персональный гид при первом визите (Onboarding Guide) -->
