@@ -2391,6 +2391,188 @@ setAliasRedirectAnimation(getAliasRedirectAnimation(), false);
 // ==========================================
 const PRESET_THEMES = [
     {
+        id: 'black-pink',
+        name: 'Cyber Pink',
+        icon: '🌸',
+        tag: 'Vibrant Pink',
+        bg: '#000000',
+        text: '#cb6eb9',
+        cursor: 'underline',
+        font: 'Space Grotesk',
+        shadows: false,
+        shadowColor: '#000000',
+        bgImage: 'themes/images/black-pink.png',
+        bgBlur: true,
+        sidebarPosition: 'right',
+        sidebarBlur: true,
+        sidebarOpacity: 84,
+        sidebarBlurAmount: 26,
+        aliasAnim: 'shimmer',
+        demoScript: {
+            query: '!ap seom analytics',
+            ghost: '!ap seom analytics dashboard',
+            label: 'Quick Alias',
+            alias: '!ap',
+            target: 'seom.com'
+        }
+    },
+    {
+        id: 'black-yellow',
+        name: 'Amber Cyber',
+        icon: '⚡',
+        tag: 'Golden Glow',
+        bg: '#000000',
+        text: '#d3823a',
+        cursor: 'highlight',
+        font: 'Fira Code',
+        shadows: false,
+        shadowColor: '#000000',
+        bgImage: 'themes/images/black-yellow.jpg',
+        bgBlur: true,
+        sidebarPosition: 'right',
+        sidebarBlur: true,
+        sidebarOpacity: 15,
+        sidebarBlurAmount: 26,
+        aliasAnim: 'spinner',
+        demoScript: {
+            query: 'mk speed test',
+            ghost: 'mk monkeytype 120 wpm test',
+            label: 'Quick Alias',
+            alias: 'mk',
+            target: 'monkeytype.com'
+        }
+    },
+    {
+        id: 'black',
+        name: 'Monochrome Noir',
+        icon: '🌑',
+        tag: 'Pure Minimal',
+        bg: '#000000',
+        text: '#ffffff',
+        cursor: 'block',
+        font: 'Tektur',
+        shadows: false,
+        shadowColor: '#000000',
+        bgImage: 'themes/images/black.jpg',
+        bgBlur: true,
+        sidebarPosition: 'left',
+        sidebarBlur: true,
+        sidebarOpacity: 0,
+        sidebarBlurAmount: 45,
+        aliasAnim: 'shimmer',
+        demoScript: {
+            query: 'gh CleanTab',
+            ghost: 'gh happy2111/CleanTab master',
+            label: 'Search in',
+            alias: 'gh',
+            target: 'github.com'
+        }
+    },
+    {
+        id: 'blue',
+        name: 'Blue Horizon',
+        icon: '🌊',
+        tag: 'Crisp Ocean',
+        bg: '#000000',
+        text: '#ffffff',
+        cursor: 'underline',
+        font: 'DM Sans',
+        shadows: false,
+        shadowColor: '#000000',
+        bgImage: 'themes/images/blue.png',
+        bgBlur: false,
+        sidebarPosition: 'right',
+        sidebarBlur: true,
+        sidebarOpacity: 0,
+        sidebarBlurAmount: 26,
+        aliasAnim: 'shimmer',
+        demoScript: {
+            query: '!c deep ocean',
+            ghost: '!c deep ocean bathymetry charts',
+            label: 'Search in',
+            alias: '!c',
+            target: 'claude.ai'
+        }
+    },
+    {
+        id: 'dark-red-v2',
+        name: 'Crimson Shadow',
+        icon: '🩸',
+        tag: 'Dark Crimson',
+        bg: '#000000',
+        text: '#681515',
+        cursor: 'highlight',
+        font: 'Fira Code',
+        shadows: false,
+        shadowColor: '#000000',
+        bgImage: 'themes/images/dark-red-v2.png',
+        bgBlur: true,
+        sidebarPosition: 'left',
+        sidebarBlur: true,
+        sidebarOpacity: 84,
+        sidebarBlurAmount: 26,
+        aliasAnim: 'shimmer',
+        demoScript: {
+            query: 'pr server status',
+            ghost: 'pr ahost.uz hosting control',
+            label: 'Quick Alias',
+            alias: 'pr',
+            target: 'ahost.uz'
+        }
+    },
+    {
+        id: 'dark-red',
+        name: 'Obsidian Ember',
+        icon: '🔥',
+        tag: 'Warm Ember',
+        bg: '#000000',
+        text: '#ffe1cc',
+        cursor: 'block',
+        font: 'Tektur',
+        shadows: false,
+        shadowColor: '#000000',
+        bgImage: 'themes/images/dark-red.png',
+        bgBlur: true,
+        sidebarPosition: 'left',
+        sidebarBlur: true,
+        sidebarOpacity: 0,
+        sidebarBlurAmount: 45,
+        aliasAnim: 'shimmer',
+        demoScript: {
+            query: '!ai neural synthesis',
+            ghost: '!ai neural synthesis dark mode',
+            label: 'Search in',
+            alias: '!ai',
+            target: 'chatgpt.com'
+        }
+    },
+    {
+        id: 'red-yellow',
+        name: 'Sunset Blaze',
+        icon: '🌅',
+        tag: 'Golden Sunset',
+        bg: '#000000',
+        text: '#ffe761',
+        cursor: 'underline',
+        font: 'Tektur',
+        shadows: false,
+        shadowColor: '#000000',
+        bgImage: 'themes/images/red-yellow.jpg',
+        bgBlur: false,
+        sidebarPosition: 'left',
+        sidebarBlur: true,
+        sidebarOpacity: 0,
+        sidebarBlurAmount: 45,
+        aliasAnim: 'shimmer',
+        demoScript: {
+            query: 'yt synthwave sunset',
+            ghost: 'yt synthwave sunset radio 24/7',
+            label: 'Search in',
+            alias: 'yt',
+            target: 'youtube.com'
+        }
+    },
+    {
         id: 'matrix',
         name: 'Matrix Terminal',
         icon: '🟢',
@@ -2616,12 +2798,12 @@ function applyPresetTheme(theme) {
     // Shadows
     localStorage.setItem(SHADOWS_ENABLED_KEY, String(theme.shadows));
     localStorage.setItem(SHADOW_COLOR_KEY, theme.shadowColor);
-    updateShadows(theme.shadows, theme.shadowColor);
+    applyShadowSettings({ enabled: theme.shadows, color: theme.shadowColor });
 
     // Background image
     const customImg = localStorage.getItem('theme_custom_bg_' + theme.id);
     const finalImg = customImg || theme.bgImage || null;
-    const finalBlur = customImg ? (theme.bgBlur ?? true) : (theme.bgBlur ?? false);
+    const finalBlur = customImg ? (theme.bgBlur ?? true) : (theme.bgBlur === true || theme.bgBlur === 'true');
 
     if (finalImg) {
         localStorage.setItem(BG_IMAGE_KEY, finalImg);
@@ -2632,6 +2814,28 @@ function applyPresetTheme(theme) {
         localStorage.removeItem(BG_IMAGE_KEY);
         localStorage.removeItem(BG_BLUR_KEY);
         applyBgImage(null);
+    }
+
+    // Sidebar settings (if specified in preset)
+    if (theme.sidebarPosition && typeof setSidebarPosition === 'function') {
+        setSidebarPosition(theme.sidebarPosition);
+    }
+    if (theme.sidebarBlur !== undefined) {
+        localStorage.setItem(SIDEBAR_BLUR_KEY, String(theme.sidebarBlur));
+    }
+    if (theme.sidebarOpacity !== undefined) {
+        localStorage.setItem(SIDEBAR_OPACITY_KEY, String(theme.sidebarOpacity));
+    }
+    if (theme.sidebarBlurAmount !== undefined) {
+        localStorage.setItem(SIDEBAR_BLUR_AMOUNT_KEY, String(theme.sidebarBlurAmount));
+    }
+    if (typeof applySidebarBlurSettings === 'function') {
+        applySidebarBlurSettings();
+    }
+
+    // Alias redirect animation (if specified in preset)
+    if (theme.aliasAnim && typeof setAliasRedirectAnimation === 'function') {
+        setAliasRedirectAnimation(theme.aliasAnim, false);
     }
 
     localStorage.setItem('active_theme_id', theme.id);
@@ -2661,6 +2865,15 @@ function renderThemeGallery() {
         const isActive = isThemeActive(theme);
         const customImg = localStorage.getItem('theme_custom_bg_' + theme.id);
         const displayImg = customImg || theme.bgImage || '';
+        const isBlurred = customImg ? (theme.bgBlur ?? true) : (theme.bgBlur === true || theme.bgBlur === 'true');
+
+        const isLeft = theme.sidebarPosition === 'left';
+        const hasSidebarBlur = theme.sidebarBlur === true || theme.sidebarBlur === 'true';
+        const sOpacity = (theme.sidebarOpacity !== undefined) ? parseInt(theme.sidebarOpacity, 10) : 40;
+        const sBlur = (theme.sidebarBlurAmount !== undefined) ? parseInt(theme.sidebarBlurAmount, 10) : 20;
+        const sAlpha = sOpacity / 100;
+        const sidebarBg = hasSidebarBlur ? hexToRgba(theme.bg || '#000000', sAlpha) : (theme.bg || '#000000');
+        const sidebarBlurCss = hasSidebarBlur ? (sBlur + 'px') : '0px';
 
         const card = document.createElement('div');
         card.className = `theme-card ${isActive ? 'active-theme' : ''}`;
@@ -2673,9 +2886,9 @@ function renderThemeGallery() {
             </div>
             <div class="theme-card-stage" data-theme-id="${theme.id}">
                 <div class="demo-viewport">
-                    <div class="demo-screen" style="--demo-bg: ${theme.bg}; --demo-text: ${theme.text}; --demo-font: '${theme.font}', monospace; background-color: ${theme.bg}; color: ${theme.text};">
+                    <div class="demo-screen ${isLeft ? 'sidebar-left' : ''}" style="--demo-bg: ${theme.bg}; --demo-text: ${theme.text}; --demo-font: '${theme.font}', monospace; --demo-sidebar-bg: ${sidebarBg}; --demo-sidebar-blur: ${sidebarBlurCss}; background-color: ${theme.bg}; color: ${theme.text};">
                         <div class="demo-nav-loader-bar"></div>
-                        ${displayImg ? `<div class="demo-screen-bg-layer" style="background-image: url('${displayImg}'); ${theme.bgBlur ? 'filter: blur(14px); transform: scale(1.08);' : ''}"></div>` : ''}
+                        ${displayImg ? `<div class="demo-screen-bg-layer" style="background-image: url('${displayImg}'); ${isBlurred ? 'filter: blur(14px); transform: scale(1.08);' : ''}"></div>` : ''}
 
                         <!-- 1:1 CleanTab Top Actions -->
                         <div class="demo-top-actions">
@@ -2805,36 +3018,37 @@ function startGalleryAnimation() {
             if (!screenEl || !inputWrap || !typedEl) return;
 
             const q = theme.demoScript.query;
+            const anim = theme.aliasAnim || 'shimmer';
             const cardStep = (galleryStep + idx * 7) % 65;
 
             if (cardStep < 22) {
                 // 1. Text typing into search input
-                inputWrap.classList.remove('alias-loading', 'alias-anim-shimmer');
+                inputWrap.classList.remove('alias-loading', 'alias-anim-shimmer', 'alias-anim-spinner', 'alias-anim-line', 'alias-anim-pulse', 'alias-anim-none');
                 if (loaderBar) loaderBar.classList.remove('loading');
                 screenEl.classList.remove('sidebar-open');
 
                 const charCount = Math.min(q.length, Math.floor(cardStep * (q.length / 16)));
                 typedEl.textContent = q.slice(0, charCount);
             } else if (cardStep < 36) {
-                // 2. Query finished -> Alias Redirect Shimmer Wave Animation!
+                // 2. Query finished -> Alias Redirect Animation!
                 typedEl.textContent = q;
-                inputWrap.classList.add('alias-loading', 'alias-anim-shimmer');
+                inputWrap.classList.add('alias-loading', `alias-anim-${anim}`);
                 if (loaderBar) loaderBar.classList.add('loading');
                 screenEl.classList.remove('sidebar-open');
             } else if (cardStep < 54) {
-                // 3. Bookmarks sidebar slides open! Main search area shifts left!
+                // 3. Bookmarks sidebar slides open! Main search area shifts!
                 typedEl.textContent = q;
-                inputWrap.classList.add('alias-loading', 'alias-anim-shimmer');
+                inputWrap.classList.add('alias-loading', `alias-anim-${anim}`);
                 screenEl.classList.add('sidebar-open');
             } else if (cardStep < 60) {
                 // 4. Sidebar slides closed
                 screenEl.classList.remove('sidebar-open');
-                inputWrap.classList.remove('alias-loading', 'alias-anim-shimmer');
+                inputWrap.classList.remove('alias-loading', 'alias-anim-shimmer', 'alias-anim-spinner', 'alias-anim-line', 'alias-anim-pulse', 'alias-anim-none');
                 if (loaderBar) loaderBar.classList.remove('loading');
             } else {
                 // 5. Reset pause before repeating
                 typedEl.textContent = '';
-                inputWrap.classList.remove('alias-loading', 'alias-anim-shimmer');
+                inputWrap.classList.remove('alias-loading', 'alias-anim-shimmer', 'alias-anim-spinner', 'alias-anim-line', 'alias-anim-pulse', 'alias-anim-none');
                 if (loaderBar) loaderBar.classList.remove('loading');
                 screenEl.classList.remove('sidebar-open');
             }
