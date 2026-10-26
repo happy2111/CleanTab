@@ -1936,6 +1936,10 @@ function getTheme() {
 function saveTheme(theme) {
     try {
         localStorage.setItem(THEME_KEY, JSON.stringify(theme));
+        if (theme) {
+            if (theme.bg) localStorage.setItem('theme_bg', theme.bg);
+            if (theme.text) localStorage.setItem('theme_text', theme.text);
+        }
     } catch (e) {}
 }
 
@@ -1973,6 +1977,7 @@ function setThemeText(color) {
     saveTheme(theme);
     localStorage.setItem('active_theme_id', 'custom');
     applyTheme(theme);
+    if (typeof updateCaret === 'function') updateCaret();
     if (typeof renderThemeGallery === 'function') renderThemeGallery();
 }
 
@@ -2904,8 +2909,9 @@ if (themeCardBgInput) {
 function exportCurrentTheme() {
     try {
         const activeId = localStorage.getItem('active_theme_id') || 'custom';
-        const currentBg = localStorage.getItem('theme_bg') || '#000000';
-        const currentText = localStorage.getItem('theme_text') || '#ffffff';
+        const currentTheme = (typeof getTheme === 'function') ? getTheme() : { bg: '#000000', text: '#ffffff' };
+        const currentBg = currentTheme.bg || '#000000';
+        const currentText = currentTheme.text || '#ffffff';
         const currentFont = localStorage.getItem('app_font') || 'Tektur';
         const currentCaret = localStorage.getItem('caret_style') || 'underline';
         const currentShadows = localStorage.getItem('shadows_enabled') === 'true';
@@ -6327,14 +6333,16 @@ window.addEventListener('resize', () => {
 // ==========================================
 function exportConfig() {
     try {
+        const theme = (typeof getTheme === 'function') ? getTheme() : { bg: '#000000', text: '#ffffff' };
         const config = {
             version: 1,
             appName: 'New Tab Extension',
             exportedAt: new Date().toISOString(),
             settings: {
-                theme_bg: localStorage.getItem('theme_bg'),
-                theme_text: localStorage.getItem('theme_text'),
-                active_theme_id: localStorage.getItem('active_theme_id'),
+                theme_settings: JSON.stringify(theme),
+                theme_bg: theme.bg,
+                theme_text: theme.text,
+                active_theme_id: localStorage.getItem('active_theme_id') || 'custom',
                 app_font: localStorage.getItem('app_font'),
                 bg_image: localStorage.getItem('bg_image'),
                 bg_blur: localStorage.getItem('bg_blur'),
@@ -6397,7 +6405,7 @@ function importConfig(file) {
             }
             const settings = (data.settings && typeof data.settings === 'object') ? data.settings : data;
             const validKeys = [
-                'theme_bg', 'theme_text', 'active_theme_id', 'app_font', 'bg_image', 'bg_blur', 'custom_placeholder',
+                'theme_settings', 'theme_bg', 'theme_text', 'active_theme_id', 'app_font', 'bg_image', 'bg_blur', 'custom_placeholder',
                 'caret_style', 'shadows_enabled', 'shadow_color', 'app_lang', 'search_engine',
                 'search_aliases', 'app_aliases', 'alias_shortcuts', 'ai_services', 'app_shortcuts',
                 'shortcut_hints_enabled', 'history_saving_enabled',
@@ -6419,13 +6427,41 @@ function importConfig(file) {
                 throw new Error('No compatible settings found');
             }
 
-            // Переприменение всех настроек
-            applyTheme(getTheme());
+            // Точное восстановление темы (фон + цвет текста и курсора)
+            let importedTheme = null;
+            if (settings.theme_settings) {
+                try {
+                    const parsed = typeof settings.theme_settings === 'string' ? JSON.parse(settings.theme_settings) : settings.theme_settings;
+                    if (parsed && (parsed.bg || parsed.text)) importedTheme = parsed;
+                } catch (err) {}
+            }
+            if (!importedTheme) {
+                const bg = settings.theme_bg || settings.bg;
+                const text = settings.theme_text || settings.text;
+                if (bg || text) {
+                    importedTheme = { bg: bg || '#000000', text: text || '#ffffff' };
+                }
+            }
+
+            if (importedTheme) {
+                const current = getTheme();
+                const finalTheme = {
+                    bg: importedTheme.bg || settings.theme_bg || settings.bg || current.bg,
+                    text: importedTheme.text || settings.theme_text || settings.text || current.text
+                };
+                saveTheme(finalTheme);
+                applyTheme(finalTheme);
+            } else {
+                applyTheme(getTheme());
+            }
+
             applyFont(localStorage.getItem(FONT_KEY) || 'Tektur');
             applyBgImage(localStorage.getItem(BG_IMAGE_KEY));
             setBgBlur(localStorage.getItem(BG_BLUR_KEY) === 'true');
             applyShadowSettings();
             setCaretStyle(getCaretStyle());
+            if (typeof updateCaret === 'function') updateCaret();
+
             if (customPlaceholderInput) {
                 customPlaceholderInput.value = localStorage.getItem(CUSTOM_PLACEHOLDER_KEY) || '';
             }
