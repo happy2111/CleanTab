@@ -1804,7 +1804,6 @@ function setLanguage(lang) {
     const labelLangRestartTourBtn = document.getElementById('label-lang-restart-tour-btn');
 
     if (welcomeTitle) welcomeTitle.textContent = t.welcomeTitle || "Welcome to CleanTab";
-    if (welcomeSubtitle) welcomeSubtitle.textContent = t.welcomeSubtitle || "Choose your preferred language to get started";
     if (labelWelcomeContinue) labelWelcomeContinue.textContent = t.welcomeContinue || "Continue";
     if (titleFirstrunCard) titleFirstrunCard.textContent = t.resetFirstRunTitle || "First-Run & Welcome Tour";
     if (descFirstrunCard) descFirstrunCard.textContent = t.resetFirstRunDesc || "Reset the first-run state and reload the page to choose your language and replay the interactive guide.";
