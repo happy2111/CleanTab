@@ -169,13 +169,6 @@ const themePlaceholderLabel = document.getElementById('theme-placeholder-label')
 const customPlaceholderInput = document.getElementById('custom-placeholder-input');
 const btnResetPlaceholder = document.getElementById('btn-reset-placeholder');
 
-const themeShadowsTitle = document.getElementById('theme-shadows-title');
-const chkShadowsEnabled = document.getElementById('chk-shadows-enabled');
-const labelShadowsEnabled = document.getElementById('label-shadows-enabled');
-const shadowColorLabel = document.getElementById('shadow-color-label');
-const pickerShadowColor = document.getElementById('picker-shadow-color');
-const shadowColorPreview = document.getElementById('shadow-color-preview');
-
 const themeAliasAnimLabel = document.getElementById('theme-alias-anim-label');
 const aliasAnimOptions = document.getElementById('alias-anim-options');
 const btnTestAliasAnim = document.getElementById('btn-test-alias-anim');
@@ -1779,9 +1772,6 @@ function setLanguage(lang) {
     if (themeFontLabel) themeFontLabel.textContent = t.fontLabel;
     if (themePlaceholderLabel) themePlaceholderLabel.textContent = t.placeholderLabel;
     if (btnResetPlaceholder) btnResetPlaceholder.textContent = t.placeholderReset;
-    if (themeShadowsTitle) themeShadowsTitle.textContent = t.shadowsLabel;
-    if (labelShadowsEnabled) labelShadowsEnabled.textContent = t.shadowsEnabled;
-    if (shadowColorLabel) shadowColorLabel.textContent = t.shadowColorLabel;
     const titleExportCard = document.getElementById('title-export-card');
     const descExportCard = document.getElementById('desc-export-card');
     const titleImportCard = document.getElementById('title-import-card');
@@ -2239,25 +2229,6 @@ function applyShadowSettings(settings) {
         localStorage.setItem(SHADOW_COLOR_KEY, settings.color || '#000000');
     } catch (e) {}
     updateShadows(settings.enabled, settings.color || '#000000');
-    if (chkShadowsEnabled) chkShadowsEnabled.checked = settings.enabled;
-    if (pickerShadowColor) pickerShadowColor.value = settings.color || '#000000';
-    if (shadowColorPreview) shadowColorPreview.textContent = (settings.color || '#000000').toUpperCase();
-}
-
-if (chkShadowsEnabled) {
-    chkShadowsEnabled.addEventListener('change', () => {
-        const s = getShadowSettings();
-        s.enabled = chkShadowsEnabled.checked;
-        applyShadowSettings(s);
-    });
-}
-
-if (pickerShadowColor) {
-    pickerShadowColor.addEventListener('input', () => {
-        const s = getShadowSettings();
-        s.color = pickerShadowColor.value;
-        applyShadowSettings(s);
-    });
 }
 
 // --- Cursor Shape Settings ---
@@ -2640,8 +2611,6 @@ function applyPresetTheme(theme) {
     // Shadows
     localStorage.setItem(SHADOWS_ENABLED_KEY, String(theme.shadows));
     localStorage.setItem(SHADOW_COLOR_KEY, theme.shadowColor);
-    if (chkShadowsEnabled) chkShadowsEnabled.checked = theme.shadows;
-    if (pickerShadowColor) pickerShadowColor.value = theme.shadowColor;
     updateShadows(theme.shadows, theme.shadowColor);
 
     // Background image
