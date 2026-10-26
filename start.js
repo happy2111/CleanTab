@@ -1796,7 +1796,6 @@ function setLanguage(lang) {
     if (titleImportCard) titleImportCard.textContent = t.importCardTitle || "Restore Backup";
     if (descImportCard) descImportCard.textContent = t.importCardDesc || "Restore your configuration from a JSON file. All preferences apply instantly.";
     const welcomeTitle = document.getElementById('welcome-title');
-    const welcomeSubtitle = document.getElementById('welcome-subtitle');
     const labelWelcomeContinue = document.getElementById('label-welcome-continue');
     const titleFirstrunCard = document.getElementById('title-firstrun-card');
     const descFirstrunCard = document.getElementById('desc-firstrun-card');
@@ -1981,14 +1980,18 @@ function setThemeBg(color) {
     const theme = getTheme();
     theme.bg = color;
     saveTheme(theme);
+    localStorage.setItem('active_theme_id', 'custom');
     applyTheme(theme);
+    if (typeof renderThemeGallery === 'function') renderThemeGallery();
 }
 
 function setThemeText(color) {
     const theme = getTheme();
     theme.text = color;
     saveTheme(theme);
+    localStorage.setItem('active_theme_id', 'custom');
     applyTheme(theme);
+    if (typeof renderThemeGallery === 'function') renderThemeGallery();
 }
 
 if (bgPresets) {
@@ -2209,8 +2212,8 @@ function updateShadows(enabled, color) {
     root.style.setProperty('--shadow-enabled', enabled ? '1' : '0');
     if (enabled) {
         root.style.setProperty('--shadow-modal', `0 32px 80px ${hexToRgba(color, 0.85)}, 0 0 0 1px rgba(255, 255, 255, 0.08)`);
-        root.style.setProperty('--shadow-sidebar', `-10px 0 30px ${hexToRgba(color, 0.5)}`);
-        root.style.setProperty('--shadow-sidebar-left', `10px 0 30px ${hexToRgba(color, 0.5)}`);
+        root.style.setProperty('--shadow-sidebar', 'none');
+        root.style.setProperty('--shadow-sidebar-left', 'none');
         root.style.setProperty('--shadow-hint', `0 2px 6px ${hexToRgba(color, 0.7)}`);
     } else {
         root.style.setProperty('--shadow-modal', 'none');
@@ -2416,6 +2419,678 @@ setCaretStyle(getCaretStyle());
 setAliasRedirectAnimation(getAliasRedirectAnimation(), false);
 
 // ==========================================
+// 3c. Галерея тем (Themes Gallery / Store)
+// ==========================================
+const PRESET_THEMES = [
+    {
+        id: 'matrix',
+        name: 'Matrix Terminal',
+        icon: '🟢',
+        tag: 'Terminal',
+        bg: '#0d1117',
+        text: '#00ff66',
+        cursor: 'block',
+        font: 'JetBrains Mono',
+        shadows: true,
+        shadowColor: '#00ff66',
+        bgImage: '',
+        bgBlur: false,
+        demoScript: {
+            query: '!ai matrix initialize',
+            ghost: '!ai matrix initialize --stream',
+            label: 'Search in',
+            alias: '!ai',
+            target: 'chatgpt.com'
+        }
+    },
+    {
+        id: 'dracula',
+        name: 'Dracula Official',
+        icon: '🟣',
+        tag: 'Popular',
+        bg: '#282a36',
+        text: '#ff79c6',
+        cursor: 'bar',
+        font: 'Fira Code',
+        shadows: true,
+        shadowColor: '#bd93f9',
+        bgImage: '',
+        bgBlur: false,
+        demoScript: {
+            query: '!ai count vampires',
+            ghost: '!ai count vampires in transylvania',
+            label: 'Search in',
+            alias: '!ai',
+            target: 'chatgpt.com'
+        }
+    },
+    {
+        id: 'nord',
+        name: 'Nord Frost',
+        icon: '❄️',
+        tag: 'Arctic Minimal',
+        bg: '#2e3440',
+        text: '#eceff4',
+        cursor: 'bar',
+        font: 'Inter',
+        shadows: true,
+        shadowColor: '#88c0d0',
+        bgImage: '',
+        bgBlur: false,
+        demoScript: {
+            query: 'aurora borealis',
+            ghost: 'aurora borealis live stream tromso',
+            label: 'Search in',
+            alias: 'Google',
+            target: 'google.com'
+        }
+    },
+    {
+        id: 'catppuccin',
+        name: 'Catppuccin Mocha',
+        icon: '☕',
+        tag: 'Cozy Pastel',
+        bg: '#1e1e2e',
+        text: '#cdd6f4',
+        cursor: 'bar',
+        font: 'Inter',
+        shadows: true,
+        shadowColor: '#cba6f7',
+        bgImage: '',
+        bgBlur: false,
+        demoScript: {
+            query: '!c cozy brew',
+            ghost: '!c cozy brew latte art recipe',
+            label: 'Search in',
+            alias: '!c',
+            target: 'claude.ai'
+        }
+    },
+    {
+        id: 'cyberpunk',
+        name: 'Cyberpunk Neon',
+        icon: '🌆',
+        tag: 'Neon High-Tech',
+        bg: '#0f0c29',
+        text: '#00f2fe',
+        cursor: 'underline',
+        font: 'Tektur',
+        shadows: true,
+        shadowColor: '#00f2fe',
+        bgImage: '',
+        bgBlur: true,
+        demoScript: {
+            query: '!ds neural net',
+            ghost: '!ds neural net matrix architecture',
+            label: 'Search in',
+            alias: '!ds',
+            target: 'deepseek.com'
+        }
+    },
+    {
+        id: 'tokyo-night',
+        name: 'Tokyo Night',
+        icon: '🌃',
+        tag: 'Deep Navy',
+        bg: '#1a1b26',
+        text: '#7aa2f7',
+        cursor: 'bar',
+        font: 'JetBrains Mono',
+        shadows: true,
+        shadowColor: '#7aa2f7',
+        bgImage: '',
+        bgBlur: false,
+        demoScript: {
+            query: '!ai tokyo synth',
+            ghost: '!ai tokyo synthwave night drive',
+            label: 'Search in',
+            alias: '!ai',
+            target: 'chatgpt.com'
+        }
+    },
+    {
+        id: 'retro-amber',
+        name: 'Retro Amber CRT',
+        icon: '📻',
+        tag: 'Vintage 80s',
+        bg: '#120d08',
+        text: '#ffb000',
+        cursor: 'block',
+        font: 'Tektur',
+        shadows: true,
+        shadowColor: '#ffb000',
+        bgImage: '',
+        bgBlur: false,
+        demoScript: {
+            query: 'l3000',
+            ghost: 'localhost:3000/dashboard',
+            label: 'Quick Search',
+            alias: 'l3000',
+            target: 'localhost:3000'
+        }
+    },
+    {
+        id: 'paper-minimal',
+        name: 'Paper Minimal',
+        icon: '☀️',
+        tag: 'Clean Light',
+        bg: '#f5f3ef',
+        text: '#2d2d2d',
+        cursor: 'bar',
+        font: 'Inter',
+        shadows: false,
+        shadowColor: '#000000',
+        bgImage: '',
+        bgBlur: false,
+        demoScript: {
+            query: 'notes on typography',
+            ghost: 'notes on typography and layout',
+            label: 'Search in',
+            alias: 'Google',
+            target: 'google.com'
+        }
+    },
+    {
+        id: 'oled-black',
+        name: 'OLED Pure Black',
+        icon: '🖤',
+        tag: 'True Black',
+        bg: '#000000',
+        text: '#ffffff',
+        cursor: 'bar',
+        font: 'Tektur',
+        shadows: false,
+        shadowColor: '#000000',
+        bgImage: '',
+        bgBlur: false,
+        demoScript: {
+            query: '!ai stealth zero',
+            ghost: '!ai stealth zero power state',
+            label: 'Search in',
+            alias: '!ai',
+            target: 'chatgpt.com'
+        }
+    }
+];
+
+let pendingThemeImgId = null;
+let galleryAnimTimer = null;
+let galleryStep = 0;
+
+function isThemeActive(theme) {
+    const activeId = localStorage.getItem('active_theme_id');
+    if (activeId) return activeId === theme.id;
+    const currentTheme = getTheme();
+    const currentCursor = getCaretStyle();
+    return currentTheme.bg.toLowerCase() === theme.bg.toLowerCase() &&
+           currentTheme.text.toLowerCase() === theme.text.toLowerCase() &&
+           currentCursor === theme.cursor;
+}
+
+function showThemeStatus(text, success = true) {
+    if (!themeStatusMsg) return;
+    themeStatusMsg.textContent = text;
+    themeStatusMsg.style.borderColor = success ? 'rgba(0, 255, 102, 0.45)' : 'rgba(255, 71, 87, 0.45)';
+    themeStatusMsg.style.color = success ? '#00ff66' : '#ff4757';
+    themeStatusMsg.style.display = 'block';
+    setTimeout(() => {
+        if (themeStatusMsg) themeStatusMsg.style.display = 'none';
+    }, 3200);
+}
+
+function applyPresetTheme(theme) {
+    if (!theme) return;
+    saveTheme({ bg: theme.bg, text: theme.text });
+    applyTheme({ bg: theme.bg, text: theme.text });
+    applyFont(theme.font);
+    setCaretStyle(theme.cursor);
+
+    // Shadows
+    localStorage.setItem(SHADOWS_ENABLED_KEY, String(theme.shadows));
+    localStorage.setItem(SHADOW_COLOR_KEY, theme.shadowColor);
+    if (chkShadowsEnabled) chkShadowsEnabled.checked = theme.shadows;
+    if (pickerShadowColor) pickerShadowColor.value = theme.shadowColor;
+    updateShadows(theme.shadows, theme.shadowColor);
+
+    // Background image
+    const customImg = localStorage.getItem('theme_custom_bg_' + theme.id);
+    const finalImg = customImg || theme.bgImage || null;
+    const finalBlur = customImg ? (theme.bgBlur ?? true) : (theme.bgBlur ?? false);
+
+    if (finalImg) {
+        localStorage.setItem(BG_IMAGE_KEY, finalImg);
+        localStorage.setItem(BG_BLUR_KEY, String(finalBlur));
+        applyBgImage(finalImg);
+        setBgBlur(finalBlur);
+    } else {
+        localStorage.removeItem(BG_IMAGE_KEY);
+        localStorage.removeItem(BG_BLUR_KEY);
+        applyBgImage(null);
+    }
+
+    localStorage.setItem('active_theme_id', theme.id);
+    renderThemeGallery();
+    const lang = getLanguage();
+    const t = translations[lang] || translations.en;
+    showThemeStatus(`${t.themeApplySuccess || 'Theme applied!'} (${theme.name})`);
+}
+
+function updateDemoScales() {
+    if (!themeCardsGrid) return;
+    const stages = themeCardsGrid.querySelectorAll('.theme-card-stage');
+    stages.forEach(stage => {
+        const width = stage.clientWidth || stage.getBoundingClientRect().width || 300;
+        const scale = width / 1024;
+        stage.style.setProperty('--demo-scale', scale);
+    });
+}
+
+function renderThemeGallery() {
+    if (!themeCardsGrid) return;
+    const lang = getLanguage();
+    const t = translations[lang] || translations.en;
+    themeCardsGrid.innerHTML = '';
+
+    PRESET_THEMES.forEach((theme) => {
+        const isActive = isThemeActive(theme);
+        const customImg = localStorage.getItem('theme_custom_bg_' + theme.id);
+        const displayImg = customImg || theme.bgImage || '';
+
+        const card = document.createElement('div');
+        card.className = `theme-card ${isActive ? 'active-theme' : ''}`;
+        card.dataset.themeId = theme.id;
+
+        card.innerHTML = `
+            <div class="theme-card-header">
+                <span class="theme-card-name">${theme.name}</span>
+                ${isActive ? '<span class="theme-card-active-check">✓</span>' : ''}
+            </div>
+            <div class="theme-card-stage" data-theme-id="${theme.id}">
+                <div class="demo-viewport">
+                    <div class="demo-screen" style="--demo-bg: ${theme.bg}; --demo-text: ${theme.text}; --demo-font: '${theme.font}', monospace; background-color: ${theme.bg}; color: ${theme.text};">
+                        <div class="demo-nav-loader-bar"></div>
+                        ${displayImg ? `<div class="demo-screen-bg-layer" style="background-image: url('${displayImg}'); ${theme.bgBlur ? 'filter: blur(14px); transform: scale(1.08);' : ''}"></div>` : ''}
+
+                        <!-- 1:1 CleanTab Top Actions -->
+                        <div class="demo-top-actions">
+                            <button class="demo-action-btn" type="button" tabindex="-1">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                            </button>
+                            <button class="demo-action-btn" type="button" tabindex="-1">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+                            </button>
+                            <button class="demo-action-btn" type="button" tabindex="-1">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- 1:1 CleanTab Main Content -->
+                        <main class="demo-main-content">
+                            <div class="demo-search-form">
+                                <div class="demo-input-wrapper">
+                                    <div class="demo-ghost-text">
+                                        <span class="demo-ghost-typed"></span><span class="demo-ghost-suffix"></span>
+                                    </div>
+                                    <div class="demo-search-input">
+                                        <span class="demo-real-typed"></span><span class="demo-custom-caret demo-caret-${theme.cursor}"></span>
+                                    </div>
+                                </div>
+                                <div class="demo-nav-indicator">
+                                    <div class="demo-nav-spinner"></div>
+                                    <div class="demo-nav-indicator-text">
+                                        <span class="demo-nav-label">${theme.demoScript.label || 'Search in'}</span>
+                                        <span class="demo-nav-alias-pill">${theme.demoScript.alias || '!ai'}</span>
+                                        <span class="demo-nav-arrow">→</span>
+                                        <span class="demo-nav-target">${theme.demoScript.target || 'chatgpt.com'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+
+                        <!-- 1:1 CleanTab Bookmarks Sidebar (No Shadows, No Borders) -->
+                        <aside class="demo-idea-sidebar">
+                            <div class="demo-sidebar-header">
+                                <div class="demo-header-actions">
+                                    <button class="demo-icon-btn" type="button" tabindex="-1">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+                                    </button>
+                                    <button class="demo-icon-btn" type="button" tabindex="-1">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+                                    </button>
+                                    <button class="demo-icon-btn" type="button" tabindex="-1">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-2l-2-2V5h1V3H6v2h1v8l-2 2v2z"></path></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="demo-sidebar-content">
+                                <div class="demo-tree-row" style="padding-left: 8px;">
+                                    <span class="demo-tree-arrow expanded"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></span>
+                                    <span class="demo-tree-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></span>
+                                    <span class="demo-tree-title">Bookmarks Bar</span>
+                                    <span class="demo-tree-count">4</span>
+                                </div>
+                                <div class="demo-tree-children">
+                                    <div class="demo-tree-row" style="padding-left: 24px;">
+                                        <span class="demo-tree-arrow expanded"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></span>
+                                        <span class="demo-tree-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></span>
+                                        <span class="demo-tree-title">Work & Dev</span>
+                                        <span class="demo-tree-count">3</span>
+                                    </div>
+                                    <div class="demo-tree-children">
+                                        <div class="demo-tree-row" style="padding-left: 40px;">
+                                            <span class="demo-tree-arrow hidden"></span>
+                                            <span class="demo-tree-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></span>
+                                            <span class="demo-tree-title">GitHub</span>
+                                            <span class="demo-tree-domain">github.com</span>
+                                        </div>
+                                        <div class="demo-tree-row" style="padding-left: 40px;">
+                                            <span class="demo-tree-arrow hidden"></span>
+                                            <span class="demo-tree-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></span>
+                                            <span class="demo-tree-title">Localhost 3000</span>
+                                            <span class="demo-tree-domain">localhost</span>
+                                        </div>
+                                    </div>
+                                    <div class="demo-tree-row" style="padding-left: 24px;">
+                                        <span class="demo-tree-arrow hidden"></span>
+                                        <span class="demo-tree-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path></svg></span>
+                                        <span class="demo-tree-title">ChatGPT</span>
+                                        <span class="demo-tree-domain">chatgpt.com</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        card.addEventListener('click', () => {
+            applyPresetTheme(theme);
+        });
+
+        themeCardsGrid.appendChild(card);
+    });
+
+    requestAnimationFrame(updateDemoScales);
+}
+
+function removeThemeCustomImage(themeId) {
+    localStorage.removeItem('theme_custom_bg_' + themeId);
+    const activeId = localStorage.getItem('active_theme_id');
+    if (activeId === themeId) {
+        localStorage.removeItem(BG_IMAGE_KEY);
+        applyBgImage(null);
+    }
+    renderThemeGallery();
+    const lang = getLanguage();
+    const t = translations[lang] || translations.en;
+    showThemeStatus(t.themeRemoveImage || 'Background removed');
+}
+
+function startGalleryAnimation() {
+    if (galleryAnimTimer) return;
+    updateDemoScales();
+    galleryAnimTimer = setInterval(() => {
+        galleryStep++;
+        const cards = document.querySelectorAll('.theme-card');
+        if (!cards.length) return;
+
+        cards.forEach((card, idx) => {
+            const themeId = card.dataset.themeId;
+            const theme = PRESET_THEMES.find(t => t.id === themeId);
+            if (!theme || !theme.demoScript) return;
+
+            const screenEl = card.querySelector('.demo-screen');
+            const inputWrap = card.querySelector('.demo-input-wrapper');
+            const loaderBar = card.querySelector('.demo-nav-loader-bar');
+            const typedEl = card.querySelector('.demo-real-typed');
+            const ghostTypedEl = card.querySelector('.demo-ghost-typed');
+            const ghostSuffixEl = card.querySelector('.demo-ghost-suffix');
+            const navIndEl = card.querySelector('.demo-nav-indicator');
+
+            if (!screenEl || !inputWrap || !typedEl || !ghostTypedEl || !ghostSuffixEl || !navIndEl) return;
+
+            const q = theme.demoScript.query;
+            const fullGhost = theme.demoScript.ghost || q;
+            const cardStep = (galleryStep + idx * 7) % 65;
+
+            if (cardStep < 22) {
+                // 1. Text typing into CleanTab search-input
+                inputWrap.classList.remove('alias-loading', 'alias-anim-shimmer');
+                if (loaderBar) loaderBar.classList.remove('loading');
+                navIndEl.classList.remove('active');
+                screenEl.classList.remove('sidebar-open');
+
+                const charCount = Math.min(q.length, Math.floor(cardStep * (q.length / 16)));
+                const currentText = q.slice(0, charCount);
+                typedEl.textContent = currentText;
+                ghostTypedEl.textContent = currentText;
+
+                // Show autocompletion ghost text suffix
+                if (charCount > 3 && fullGhost.startsWith(currentText)) {
+                    ghostSuffixEl.textContent = fullGhost.slice(charCount);
+                } else {
+                    ghostSuffixEl.textContent = '';
+                }
+            } else if (cardStep < 36) {
+                // 2. Query finished -> Alias Redirect Shimmer Animation + Floating Nav Indicator!
+                typedEl.textContent = q;
+                ghostTypedEl.textContent = '';
+                ghostSuffixEl.textContent = '';
+                inputWrap.classList.add('alias-loading', 'alias-anim-shimmer');
+                if (loaderBar) loaderBar.classList.add('loading');
+                navIndEl.classList.add('active');
+                screenEl.classList.remove('sidebar-open');
+            } else if (cardStep < 54) {
+                // 3. Bookmarks sidebar slides open! Main search area shifts left!
+                typedEl.textContent = q;
+                ghostTypedEl.textContent = '';
+                ghostSuffixEl.textContent = '';
+                inputWrap.classList.add('alias-loading', 'alias-anim-shimmer');
+                navIndEl.classList.add('active');
+                screenEl.classList.add('sidebar-open');
+            } else if (cardStep < 60) {
+                // 4. Sidebar slides closed
+                screenEl.classList.remove('sidebar-open');
+                inputWrap.classList.remove('alias-loading', 'alias-anim-shimmer');
+                if (loaderBar) loaderBar.classList.remove('loading');
+                navIndEl.classList.remove('active');
+            } else {
+                // 5. Reset pause before repeating
+                typedEl.textContent = '';
+                ghostTypedEl.textContent = '';
+                ghostSuffixEl.textContent = '';
+                inputWrap.classList.remove('alias-loading', 'alias-anim-shimmer');
+                if (loaderBar) loaderBar.classList.remove('loading');
+                navIndEl.classList.remove('active');
+                screenEl.classList.remove('sidebar-open');
+            }
+        });
+    }, 100);
+}
+
+function stopGalleryAnimation() {
+    if (galleryAnimTimer) {
+        clearInterval(galleryAnimTimer);
+        galleryAnimTimer = null;
+    }
+}
+
+window.addEventListener('resize', () => {
+    if (themeViewGallery && themeViewGallery.style.display !== 'none') {
+        updateDemoScales();
+    }
+});
+
+function switchThemeSubtab(view) {
+    if (view === 'gallery') {
+        if (subtabGalleryBtn) subtabGalleryBtn.classList.add('active');
+        if (subtabCustomBtn) subtabCustomBtn.classList.remove('active');
+        if (themeViewGallery) themeViewGallery.style.display = 'block';
+        if (themeViewCustom) themeViewCustom.style.display = 'none';
+        renderThemeGallery();
+        startGalleryAnimation();
+    } else {
+        if (subtabGalleryBtn) subtabGalleryBtn.classList.remove('active');
+        if (subtabCustomBtn) subtabCustomBtn.classList.add('active');
+        if (themeViewGallery) themeViewGallery.style.display = 'none';
+        if (themeViewCustom) themeViewCustom.style.display = 'block';
+        stopGalleryAnimation();
+    }
+}
+
+if (subtabGalleryBtn) {
+    subtabGalleryBtn.addEventListener('click', () => switchThemeSubtab('gallery'));
+}
+if (subtabCustomBtn) {
+    subtabCustomBtn.addEventListener('click', () => switchThemeSubtab('custom'));
+}
+
+if (themeCardBgInput) {
+    themeCardBgInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file || !pendingThemeImgId) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            const dataUrl = evt.target.result;
+            try {
+                localStorage.setItem('theme_custom_bg_' + pendingThemeImgId, dataUrl);
+                const activeId = localStorage.getItem('active_theme_id');
+                if (activeId === pendingThemeImgId) {
+                    localStorage.setItem(BG_IMAGE_KEY, dataUrl);
+                    applyBgImage(dataUrl);
+                }
+                renderThemeGallery();
+                const lang = getLanguage();
+                const t = translations[lang] || translations.en;
+                showThemeStatus(t.themeImageUpdated || 'Background image updated!');
+            } catch (err) {
+                alert('Image is too large for local storage.');
+            }
+        };
+        reader.readAsDataURL(file);
+        themeCardBgInput.value = '';
+    });
+}
+
+function exportCurrentTheme() {
+    try {
+        const activeId = localStorage.getItem('active_theme_id') || 'custom';
+        const currentBg = localStorage.getItem('theme_bg') || '#000000';
+        const currentText = localStorage.getItem('theme_text') || '#ffffff';
+        const currentFont = localStorage.getItem('app_font') || 'Tektur';
+        const currentCaret = localStorage.getItem('caret_style') || 'underline';
+        const currentShadows = localStorage.getItem('shadows_enabled') === 'true';
+        const currentShadowColor = localStorage.getItem('shadow_color') || '#000000';
+        const currentBgImage = localStorage.getItem(BG_IMAGE_KEY) || '';
+        const currentBgBlur = localStorage.getItem(BG_BLUR_KEY) === 'true';
+
+        const themeData = {
+            cleantab_theme: true,
+            version: 1,
+            name: activeId !== 'custom' ? (PRESET_THEMES.find(t => t.id === activeId)?.name || 'Custom Theme') : 'Custom Theme',
+            exportedAt: new Date().toISOString(),
+            theme_bg: currentBg,
+            theme_text: currentText,
+            app_font: currentFont,
+            caret_style: currentCaret,
+            shadows_enabled: currentShadows,
+            shadow_color: currentShadowColor,
+            bg_image: currentBgImage,
+            bg_blur: currentBgBlur
+        };
+
+        const blob = new Blob([JSON.stringify(themeData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const cleanName = themeData.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        a.download = `cleantab-theme-${cleanName}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        const lang = getLanguage();
+        const t = translations[lang] || translations.en;
+        showThemeStatus(t.themeExportSuccess || 'Theme exported!');
+    } catch (e) {
+        console.error('Theme export failed:', e);
+    }
+}
+
+function importThemeFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (!data || typeof data !== 'object') throw new Error('Invalid JSON');
+            if (!data.theme_bg && !data.theme_text && !data.bg && !data.text) {
+                throw new Error('Not a valid theme format');
+            }
+
+            const bg = data.theme_bg || data.bg || '#000000';
+            const text = data.theme_text || data.text || '#ffffff';
+            const font = data.app_font || data.font || 'Tektur';
+            const caret = data.caret_style || data.caret || 'underline';
+            const shadows = (data.shadows_enabled !== undefined) ? data.shadows_enabled : (data.shadows !== undefined ? data.shadows : true);
+            const shadowColor = data.shadow_color || data.shadowColor || '#000000';
+            const bgImage = data.bg_image || data.bgImage || '';
+            const bgBlur = data.bg_blur !== undefined ? data.bg_blur : (data.bgBlur !== undefined ? data.bgBlur : false);
+
+            saveTheme({ bg, text });
+            applyTheme({ bg, text });
+            applyFont(font);
+            setCaretStyle(caret);
+            localStorage.setItem(SHADOWS_ENABLED_KEY, String(shadows));
+            localStorage.setItem(SHADOW_COLOR_KEY, shadowColor);
+            updateShadows(shadows, shadowColor);
+
+            if (bgImage) {
+                localStorage.setItem(BG_IMAGE_KEY, bgImage);
+                localStorage.setItem(BG_BLUR_KEY, String(bgBlur));
+                applyBgImage(bgImage);
+                setBgBlur(bgBlur);
+            } else {
+                localStorage.removeItem(BG_IMAGE_KEY);
+                applyBgImage(null);
+            }
+
+            localStorage.setItem('active_theme_id', 'custom');
+            renderThemeGallery();
+            const lang = getLanguage();
+            const t = translations[lang] || translations.en;
+            showThemeStatus(t.themeImportSuccess || 'Theme imported!');
+        } catch (err) {
+            console.error('Import error:', err);
+            const lang = getLanguage();
+            const t = translations[lang] || translations.en;
+            showThemeStatus(t.themeImportError || 'Invalid theme file', false);
+        }
+    };
+    reader.readAsText(file);
+}
+
+if (btnExportTheme) {
+    btnExportTheme.addEventListener('click', exportCurrentTheme);
+}
+
+if (btnImportTheme && themeImportInput) {
+    btnImportTheme.addEventListener('click', () => themeImportInput.click());
+    themeImportInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) {
+            importThemeFile(file);
+            themeImportInput.value = '';
+        }
+    });
+}
+
+// ==========================================
 // 4. Модальное окно настроек и вкладки
 // ==========================================
 
@@ -2578,6 +3253,7 @@ function openModal() {
     if (typeof renderAiServices === 'function') renderAiServices();
     if (typeof renderSearchEngines === 'function') renderSearchEngines();
     if (typeof renderShortcuts === 'function') renderShortcuts();
+    if (typeof renderThemeGallery === 'function') renderThemeGallery();
     applyTheme(getTheme());
 
     const activeTabBtn = [tabHistoryBtn, tabEngineBtn, tabAliasBtn, tabAiBtn, tabShortcutsBtn, tabThemeBtn, tabLangBtn, tabBackupBtn].find(b => b && b.classList && typeof b.classList.contains === 'function' && b.classList.contains('active')) || tabHistoryBtn;
@@ -2585,11 +3261,16 @@ function openModal() {
         activeTabBtn.focus();
     }
     updateModalInfoBadge();
+
+    if (activeTabBtn === tabThemeBtn && themeViewGallery && themeViewGallery.style.display !== 'none' && typeof startGalleryAnimation === 'function') {
+        startGalleryAnimation();
+    }
 }
 
 function closeModal() {
     if (typeof stopRecording === 'function') stopRecording();
     if (typeof stopRecordingAlias === 'function') stopRecordingAlias();
+    if (typeof stopGalleryAnimation === 'function') stopGalleryAnimation();
     settingsModal.classList.remove('active');
     input.focus();
     updateCaret();
@@ -2637,6 +3318,14 @@ function switchTab(activeBtn, activeContent) {
     }
     if (activeContent === tabAiContent && typeof showAiListView === 'function') {
         showAiListView();
+    }
+    if (activeContent === tabThemeContent) {
+        if (typeof renderThemeGallery === 'function') renderThemeGallery();
+        if (themeViewGallery && themeViewGallery.style.display !== 'none' && typeof startGalleryAnimation === 'function') {
+            startGalleryAnimation();
+        }
+    } else {
+        if (typeof stopGalleryAnimation === 'function') stopGalleryAnimation();
     }
 }
 
@@ -5508,8 +6197,12 @@ function updateOnboardingStep(step) {
     if (topActions) {
         if (step === 1 || step === 2) {
             topActions.classList.add('onboarding-highlight');
+            if (btnSettings) btnSettings.classList.add('onboarding-highlight');
+            if (btnFullscreen) btnFullscreen.classList.add('onboarding-highlight');
         } else {
             topActions.classList.remove('onboarding-highlight');
+            if (btnSettings) btnSettings.classList.remove('onboarding-highlight');
+            if (btnFullscreen) btnFullscreen.classList.remove('onboarding-highlight');
         }
     }
 
@@ -5603,6 +6296,8 @@ function finishOnboarding() {
     } catch (e) {}
     const topActions = document.querySelector('.top-actions');
     if (topActions) topActions.classList.remove('onboarding-highlight');
+    if (btnSettings) btnSettings.classList.remove('onboarding-highlight');
+    if (btnFullscreen) btnFullscreen.classList.remove('onboarding-highlight');
     currentOnboardingStep = 1;
 }
 
@@ -5638,6 +6333,7 @@ function exportConfig() {
             settings: {
                 theme_bg: localStorage.getItem('theme_bg'),
                 theme_text: localStorage.getItem('theme_text'),
+                active_theme_id: localStorage.getItem('active_theme_id'),
                 app_font: localStorage.getItem('app_font'),
                 bg_image: localStorage.getItem('bg_image'),
                 bg_blur: localStorage.getItem('bg_blur'),
@@ -5700,7 +6396,7 @@ function importConfig(file) {
             }
             const settings = (data.settings && typeof data.settings === 'object') ? data.settings : data;
             const validKeys = [
-                'theme_bg', 'theme_text', 'app_font', 'bg_image', 'bg_blur', 'custom_placeholder',
+                'theme_bg', 'theme_text', 'active_theme_id', 'app_font', 'bg_image', 'bg_blur', 'custom_placeholder',
                 'caret_style', 'shadows_enabled', 'shadow_color', 'app_lang', 'search_engine',
                 'search_aliases', 'app_aliases', 'alias_shortcuts', 'ai_services', 'app_shortcuts',
                 'shortcut_hints_enabled', 'history_saving_enabled',
@@ -5746,6 +6442,7 @@ function importConfig(file) {
             if (typeof setSidebarPosition === 'function') setSidebarPosition(getSidebarPosition());
             setSidebarBlur(localStorage.getItem(SIDEBAR_BLUR_KEY) === 'true');
             setAliasRedirectAnimation(getAliasRedirectAnimation(), false);
+            if (typeof renderThemeGallery === 'function') renderThemeGallery();
 
             showBackupStatus(true);
         } catch (err) {
