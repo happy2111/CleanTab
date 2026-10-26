@@ -133,9 +133,6 @@ const langTitle = document.getElementById('lang-title');
 
 const subtabGalleryBtn = document.getElementById('subtab-gallery-btn');
 const subtabCustomBtn = document.getElementById('subtab-custom-btn');
-const btnExportTheme = document.getElementById('btn-export-theme');
-const btnImportTheme = document.getElementById('btn-import-theme');
-const themeImportInput = document.getElementById('theme-import-input');
 const themeCardBgInput = document.getElementById('theme-card-bg-input');
 const themeStatusMsg = document.getElementById('theme-status-msg');
 const themeViewGallery = document.getElementById('theme-view-gallery');
@@ -143,8 +140,6 @@ const themeViewCustom = document.getElementById('theme-view-custom');
 const themeCardsGrid = document.getElementById('theme-cards-grid');
 const labelSubtabGallery = document.getElementById('label-subtab-gallery');
 const labelSubtabCustom = document.getElementById('label-subtab-custom');
-const labelExportTheme = document.getElementById('label-export-theme');
-const labelImportTheme = document.getElementById('label-import-theme');
 
 const themeBgImageLabel = document.getElementById('theme-bg-image-label');
 const bgImageInput = document.getElementById('bg-image-input');
@@ -1880,8 +1875,6 @@ function setLanguage(lang) {
 
     if (labelSubtabGallery) labelSubtabGallery.textContent = t.themeGallery || "Themes Gallery";
     if (labelSubtabCustom) labelSubtabCustom.textContent = t.themeCustomizer || "Customizer";
-    if (labelExportTheme) labelExportTheme.textContent = t.themeExport || "Export";
-    if (labelImportTheme) labelImportTheme.textContent = t.themeImport || "Import";
 
     renderHistory();
     renderAliases();
@@ -2730,20 +2723,8 @@ function renderThemeGallery() {
                         <main class="demo-main-content">
                             <div class="demo-search-form">
                                 <div class="demo-input-wrapper">
-                                    <div class="demo-ghost-text">
-                                        <span class="demo-ghost-typed"></span><span class="demo-ghost-suffix"></span>
-                                    </div>
                                     <div class="demo-search-input">
                                         <span class="demo-real-typed"></span><span class="demo-custom-caret demo-caret-${theme.cursor}"></span>
-                                    </div>
-                                </div>
-                                <div class="demo-nav-indicator">
-                                    <div class="demo-nav-spinner"></div>
-                                    <div class="demo-nav-indicator-text">
-                                        <span class="demo-nav-label">${theme.demoScript.label || 'Search in'}</span>
-                                        <span class="demo-nav-alias-pill">${theme.demoScript.alias || '!ai'}</span>
-                                        <span class="demo-nav-arrow">→</span>
-                                        <span class="demo-nav-target">${theme.demoScript.target || 'chatgpt.com'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -2846,65 +2827,41 @@ function startGalleryAnimation() {
             const inputWrap = card.querySelector('.demo-input-wrapper');
             const loaderBar = card.querySelector('.demo-nav-loader-bar');
             const typedEl = card.querySelector('.demo-real-typed');
-            const ghostTypedEl = card.querySelector('.demo-ghost-typed');
-            const ghostSuffixEl = card.querySelector('.demo-ghost-suffix');
-            const navIndEl = card.querySelector('.demo-nav-indicator');
 
-            if (!screenEl || !inputWrap || !typedEl || !ghostTypedEl || !ghostSuffixEl || !navIndEl) return;
+            if (!screenEl || !inputWrap || !typedEl) return;
 
             const q = theme.demoScript.query;
-            const fullGhost = theme.demoScript.ghost || q;
             const cardStep = (galleryStep + idx * 7) % 65;
 
             if (cardStep < 22) {
-                // 1. Text typing into CleanTab search-input
+                // 1. Text typing into search input
                 inputWrap.classList.remove('alias-loading', 'alias-anim-shimmer');
                 if (loaderBar) loaderBar.classList.remove('loading');
-                navIndEl.classList.remove('active');
                 screenEl.classList.remove('sidebar-open');
 
                 const charCount = Math.min(q.length, Math.floor(cardStep * (q.length / 16)));
-                const currentText = q.slice(0, charCount);
-                typedEl.textContent = currentText;
-                ghostTypedEl.textContent = currentText;
-
-                // Show autocompletion ghost text suffix
-                if (charCount > 3 && fullGhost.startsWith(currentText)) {
-                    ghostSuffixEl.textContent = fullGhost.slice(charCount);
-                } else {
-                    ghostSuffixEl.textContent = '';
-                }
+                typedEl.textContent = q.slice(0, charCount);
             } else if (cardStep < 36) {
-                // 2. Query finished -> Alias Redirect Shimmer Animation + Floating Nav Indicator!
+                // 2. Query finished -> Alias Redirect Shimmer Wave Animation!
                 typedEl.textContent = q;
-                ghostTypedEl.textContent = '';
-                ghostSuffixEl.textContent = '';
                 inputWrap.classList.add('alias-loading', 'alias-anim-shimmer');
                 if (loaderBar) loaderBar.classList.add('loading');
-                navIndEl.classList.add('active');
                 screenEl.classList.remove('sidebar-open');
             } else if (cardStep < 54) {
                 // 3. Bookmarks sidebar slides open! Main search area shifts left!
                 typedEl.textContent = q;
-                ghostTypedEl.textContent = '';
-                ghostSuffixEl.textContent = '';
                 inputWrap.classList.add('alias-loading', 'alias-anim-shimmer');
-                navIndEl.classList.add('active');
                 screenEl.classList.add('sidebar-open');
             } else if (cardStep < 60) {
                 // 4. Sidebar slides closed
                 screenEl.classList.remove('sidebar-open');
                 inputWrap.classList.remove('alias-loading', 'alias-anim-shimmer');
                 if (loaderBar) loaderBar.classList.remove('loading');
-                navIndEl.classList.remove('active');
             } else {
                 // 5. Reset pause before repeating
                 typedEl.textContent = '';
-                ghostTypedEl.textContent = '';
-                ghostSuffixEl.textContent = '';
                 inputWrap.classList.remove('alias-loading', 'alias-anim-shimmer');
                 if (loaderBar) loaderBar.classList.remove('loading');
-                navIndEl.classList.remove('active');
                 screenEl.classList.remove('sidebar-open');
             }
         });
@@ -3074,20 +3031,6 @@ function importThemeFile(file) {
     reader.readAsText(file);
 }
 
-if (btnExportTheme) {
-    btnExportTheme.addEventListener('click', exportCurrentTheme);
-}
-
-if (btnImportTheme && themeImportInput) {
-    btnImportTheme.addEventListener('click', () => themeImportInput.click());
-    themeImportInput.addEventListener('change', (e) => {
-        const file = e.target.files && e.target.files[0];
-        if (file) {
-            importThemeFile(file);
-            themeImportInput.value = '';
-        }
-    });
-}
 
 // ==========================================
 // 4. Модальное окно настроек и вкладки
