@@ -50,6 +50,7 @@ const settingsModal = document.getElementById('settings-modal');
 const modalCloseBtn = document.getElementById('modal-close-btn');
 const modalSettingsTitle = document.getElementById('modal-settings-title');
 const modalActiveTabTitle = document.getElementById('modal-active-tab-title');
+const modalActiveTabSubtitle = document.getElementById('modal-active-tab-subtitle');
 
 const tabHistoryBtn = document.getElementById('tab-history-btn');
 const tabEngineBtn = document.getElementById('tab-engine-btn');
@@ -1543,6 +1544,7 @@ function setLanguage(lang) {
         const lbl = activeTabBtn.querySelector('.tab-label');
         modalActiveTabTitle.textContent = lbl ? lbl.textContent : activeTabBtn.textContent;
     }
+    updateActiveTabSubtitle();
 
     if (labelShortcutHints) labelShortcutHints.textContent = t.shortcutHintsLabel;
     if (engineTitle) engineTitle.textContent = t.engineTitle;
@@ -2199,6 +2201,137 @@ setAliasRedirectAnimation(getAliasRedirectAnimation(), false);
 // ==========================================
 // 4. Модальное окно настроек и вкладки
 // ==========================================
+
+const tabSubtitles = {
+    history: {
+        en: "Manage your search history and local autocompletion records",
+        ru: "История поисковых запросов и управление автозаполнением",
+        uz: "Qidiruv tarixi va avtoto'ldirish yozuvlarini boshqarish",
+        es: "Administra tu historial de búsqueda y autocompletado local",
+        pt: "Gerencie seu histórico de pesquisa e registros locais",
+        de: "Verwalten Sie Ihren Suchverlauf und Autovervollständigungen",
+        zh: "管理您的搜索历史与本地自动补全记录",
+        ja: "検索履歴とローカルオートコンプリート記録を管理",
+        ko: "검색 기록 및 로컬 자동 완성 기록 관리",
+        ar: "إدارة سجل البحث وسجلات الإكمال التلقائي المحلية",
+        hi: "अपना खोज इतिहास और स्थानीय ऑटोकम्प्लीट रिकॉर्ड प्रबंधित करें"
+    },
+    engine: {
+        en: "Choose your primary search provider or configure custom queries",
+        ru: "Выбор поисковой системы по умолчанию",
+        uz: "Birlamchi qidiruv tizimini tanlash",
+        es: "Elige tu motor de búsqueda principal",
+        pt: "Escolha o seu motor de pesquisa principal",
+        de: "Wählen Sie Ihre Standardsuchmaschine",
+        zh: "选择您的默认搜索引擎",
+        ja: "メインの検索エンジンを選択",
+        ko: "기본 검색엔진 선택",
+        ar: "اختر محرك البحث الافتراضي",
+        hi: "अपना डिफ़ॉल्ट सर्च इंजन चुनें"
+    },
+    alias: {
+        en: "Create custom keyword shortcuts for instantaneous URL redirection",
+        ru: "Короткие ключевые слова для мгновенного перехода на сайты",
+        uz: "Saytlarga tezkor o'tish uchun maxsus kalit so'zlar",
+        es: "Atajos de palabras clave para redirección instantánea a URLs",
+        pt: "Palavras-chave personalizadas para redirecionamento instantâneo",
+        de: "Benutzerdefinierte Schlüsselwörter für sofortige Weiterleitungen",
+        zh: "创建用于瞬间跳转网页的自定义关键词别名",
+        ja: "URLに即座に移動するためのカスタムエイリアスを作成",
+        ko: "즉각적인 URL 리디렉션을 위한 사용자 정의 키워드 별칭 생성",
+        ar: "اختصارات مخصصة لإعادة التوجيه الفوري للروابط",
+        hi: "त्वरित URL पुनर्निर्देशन के लिए कस्टम कीवर्ड उपनाम बनाएं"
+    },
+    ai: {
+        en: "Direct keyboard routing to major AI platforms without telemetry",
+        ru: "Мгновенная отправка запросов в нейросети прямо из строки поиска",
+        uz: "Qidiruv satridan to'g'ridan-to'g'ri AI xizmatlariga so'rov yuborish",
+        es: "Enrutamiento directo desde el teclado a plataformas de IA",
+        pt: "Encaminhamento direto do teclado para plataformas de IA",
+        de: "Direkte Tastaturweiterleitung zu führenden KI-Plattformen",
+        zh: "通过键盘直接将提示词发送至各大 AI 对话助手",
+        ja: "主要AIチャットプラットフォームへのキーボード直接ルーティング",
+        ko: "검색창에서 주요 AI 플랫폼으로 바로 프롬프트 전송",
+        ar: "توجيه لوحة المفاتيح المباشر إلى منصات الذكاء الاصطناعي",
+        hi: "खोज बार से सीधे AI प्लेटफॉर्म पर शीघ्र संदेश भेजें"
+    },
+    shortcuts: {
+        en: "Configure keyboard navigation shortcuts and display hints",
+        ru: "Настройка горячих клавиш и подсказок управления",
+        uz: "Tezkor tugmalar va maslahatlarni sozlash",
+        es: "Configura atajos de teclado y sugerencias de pantalla",
+        pt: "Configure atalhos de teclado e dicas de ecrã",
+        de: "Tastenkombinationen und Hinweise anpassen",
+        zh: "配置键盘快捷键与按钮提示",
+        ja: "キーボードショートカットと操作ヒントを設定",
+        ko: "키보드 단축키 및 힌트 표시 설정",
+        ar: "تكوين اختصارات لوحة المفاتيح وتلميحات العرض",
+        hi: "कीबोर्ड शॉर्टकट और डिस्प्ले संकेत कॉन्फ़िगर करें"
+    },
+    theme: {
+        en: "Personalize palette colors, typography, cursor, and visual effects",
+        ru: "Настройка цветов, шрифтов, формы курсора и визуальных эффектов",
+        uz: "Mavzu ranglari, shriftlar, kursor va effektlarni sozlash",
+        es: "Personaliza colores, tipografía, cursor y efectos visuales",
+        pt: "Personalize cores, tipografia, cursor e efeitos visuais",
+        de: "Farben, Typografie, Cursor und visuelle Effekte anpassen",
+        zh: "自定义主题配色、字体、光标样式与动画效果",
+        ja: "テーマカラー、フォント、カーソル、視覚効果をカスタマイズ",
+        ko: "테마 색상, 폰트, 커서 스타일 및 시각 효과 맞춤 설정",
+        ar: "تخصيص ألوان المظهر والخط والمؤشر والتأثيرات المرئية",
+        hi: "थीम रंग, टाइपोग्राफी, कर्सर और प्रभाव अनुकूलित करें"
+    },
+    lang: {
+        en: "Choose your preferred language for the interface",
+        ru: "Выбор языка интерфейса расширения",
+        uz: "Interfeys tilini tanlash",
+        es: "Elige tu idioma preferido para la interfaz",
+        pt: "Escolha o idioma da interface",
+        de: "Wählen Sie Ihre bevorzugte Sprache für die Benutzeroberfläche",
+        zh: "选择您的界面显示语言",
+        ja: "インターフェースの表示言語を選択",
+        ko: "선호하는 인터페이스 언어 선택",
+        ar: "اختر لغتك المفضلة للواجهة",
+        hi: "इंटरफ़ेस के लिए अपनी पसंदीदा भाषा चुनें"
+    },
+    backup: {
+        en: "Export or restore your configuration, aliases, and shortcuts",
+        ru: "Резервное копирование и восстановление настроек в JSON",
+        uz: "Sozlamalar, taxalluslar va xatcho'plarni JSON formatida zaxiralash",
+        es: "Exporta o restaura tu configuración y atajos en JSON",
+        pt: "Exporte ou restaure as suas configurações e atalhos em JSON",
+        de: "Konfiguration, Aliase und Tastenkürzel als JSON sichern",
+        zh: "将您的设置、别名与快捷键导出或恢复为 JSON 文件",
+        ja: "設定、エイリアス、ショートカットをJSONでバックアップ・復元",
+        ko: "설정, 별칭 및 단축키를 JSON 파일로 백업 및 복원",
+        ar: "تصدير أو استعادة التكوين والاختصارات كملف JSON",
+        hi: "JSON फ़ाइल में अपनी सेटिंग्स और शॉर्टकट का बैकअप और पुनर्स्थापना करें"
+    }
+};
+
+function getActiveTabKey(contentEl) {
+    if (!contentEl) {
+        contentEl = [tabHistoryContent, tabEngineContent, tabAliasContent, tabAiContent, tabShortcutsContent, tabThemeContent, tabLangContent, tabBackupContent].find(c => c && c.classList && c.classList.contains('active'));
+    }
+    if (contentEl === tabHistoryContent) return 'history';
+    if (contentEl === tabEngineContent) return 'engine';
+    if (contentEl === tabAliasContent) return 'alias';
+    if (contentEl === tabAiContent) return 'ai';
+    if (contentEl === tabShortcutsContent) return 'shortcuts';
+    if (contentEl === tabThemeContent) return 'theme';
+    if (contentEl === tabLangContent) return 'lang';
+    if (contentEl === tabBackupContent) return 'backup';
+    return 'history';
+}
+
+function updateActiveTabSubtitle(contentEl) {
+    if (!modalActiveTabSubtitle) return;
+    const key = getActiveTabKey(contentEl);
+    const lang = (typeof getLanguage === 'function') ? getLanguage() : 'en';
+    const sub = (tabSubtitles[key] && (tabSubtitles[key][lang] || tabSubtitles[key].en)) || '';
+    modalActiveTabSubtitle.textContent = sub;
+}
+
 function updateModalInfoBadge() {
     if (!modalInfoBadge || !modalInfoTooltip) return;
     const lang = getLanguage();
@@ -2275,6 +2408,7 @@ function switchTab(activeBtn, activeContent) {
         }
     }
     if (activeContent) activeContent.classList.add('active');
+    updateActiveTabSubtitle(activeContent);
 
     updateModalInfoBadge();
 
