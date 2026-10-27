@@ -53,7 +53,6 @@ const modalActiveTabTitle = document.getElementById('modal-active-tab-title');
 const modalActiveTabSubtitle = document.getElementById('modal-active-tab-subtitle');
 
 const tabHistoryBtn = document.getElementById('tab-history-btn');
-const tabEngineBtn = document.getElementById('tab-engine-btn');
 const tabAliasBtn = document.getElementById('tab-alias-btn');
 const tabAiBtn = document.getElementById('tab-ai-btn');
 const tabShortcutsBtn = document.getElementById('tab-shortcuts-btn');
@@ -62,17 +61,12 @@ const tabLangBtn = document.getElementById('tab-lang-btn');
 const tabBackupBtn = document.getElementById('tab-backup-btn');
 
 const tabHistoryContent = document.getElementById('tab-history-content');
-const tabEngineContent = document.getElementById('tab-engine-content');
 const tabAliasContent = document.getElementById('tab-alias-content');
 const tabAiContent = document.getElementById('tab-ai-content');
 const tabShortcutsContent = document.getElementById('tab-shortcuts-content');
 const tabThemeContent = document.getElementById('tab-theme-content');
 const tabLangContent = document.getElementById('tab-lang-content');
 const tabBackupContent = document.getElementById('tab-backup-content');
-
-const engineTitle = document.getElementById('engine-title');
-const engineOptions = document.getElementById('engine-options');
-const btnResetEngine = document.getElementById('btn-reset-engine');
 
 const chkShortcutHints = document.getElementById('chk-shortcut-hints');
 const labelShortcutHints = document.getElementById('label-shortcut-hints');
@@ -206,7 +200,7 @@ const LANG_KEY = 'app_lang';
 const translations = {
     en: {
         title: "New Tab",
-        placeholder: "Search in Google...",
+        placeholder: "Search or type URL...",
         searchIn: "Search in %s...",
         fullscreen: "Fullscreen mode",
         settings: "Settings",
@@ -361,7 +355,7 @@ const translations = {
     },
     uz: {
         title: "Yangi varaq",
-        placeholder: "Google'da qidirish...",
+        placeholder: "Qidirish yoki URL manzil...",
         searchIn: "%s'da qidirish...",
         fullscreen: "To'liq ekran rejimi",
         settings: "Sozlamalar",
@@ -514,7 +508,7 @@ const translations = {
     },
     ru: {
         title: "Новая вкладка",
-        placeholder: "Поиск в Google...",
+        placeholder: "Поиск или введите URL...",
         searchIn: "Поиск в %s...",
         fullscreen: "Полноэкранный режим",
         settings: "Настройки",
@@ -667,7 +661,7 @@ const translations = {
     },
     es: {
         title: "Nueva pestaña",
-        placeholder: "Buscar en Google...",
+        placeholder: "Buscar o escribir URL...",
         searchIn: "Buscar en %s...",
         fullscreen: "Modo pantalla completa",
         settings: "Ajustes",
@@ -778,7 +772,7 @@ const translations = {
     },
     pt: {
         title: "Novo separador",
-        placeholder: "Pesquisar no Google...",
+        placeholder: "Pesquisar ou digitar URL...",
         searchIn: "Pesquisar no %s...",
         fullscreen: "Modo de ecrã inteiro",
         settings: "Definições",
@@ -889,7 +883,7 @@ const translations = {
     },
     de: {
         title: "Neuer Tab",
-        placeholder: "In Google suchen...",
+        placeholder: "Suchen oder URL eingeben...",
         searchIn: "In %s suchen...",
         fullscreen: "Vollbildmodus",
         settings: "Einstellungen",
@@ -1111,7 +1105,7 @@ const translations = {
     },
     ja: {
         title: "新しいタブ",
-        placeholder: "Google で検索...",
+        placeholder: "検索または URL を入力...",
         searchIn: "%s で検索...",
         fullscreen: "全画面モード",
         settings: "設定",
@@ -1222,7 +1216,7 @@ const translations = {
     },
     ko: {
         title: "새 탭",
-        placeholder: "Google에서 검색...",
+        placeholder: "검색 또는 URL 입력...",
         searchIn: "%s에서 검색...",
         fullscreen: "전체 화면 모드",
         settings: "설정",
@@ -1333,7 +1327,7 @@ const translations = {
     },
     ar: {
         title: "علامة تبويب جديدة",
-        placeholder: "البحث في Google...",
+        placeholder: "ابحث أو اكتب عنوان URL...",
         searchIn: "البحث في %s...",
         fullscreen: "ملء الشاشة",
         settings: "الإعدادات",
@@ -1705,15 +1699,14 @@ function setLanguage(lang) {
     }
 
     updateTabLabel(tabHistoryBtn, t.tabHistory);
-    updateTabLabel(tabEngineBtn, t.tabEngine);
-    updateTabLabel(tabAliasBtn, t.tabAlias);
+        updateTabLabel(tabAliasBtn, t.tabAlias);
     updateTabLabel(tabAiBtn, t.tabAi);
     updateTabLabel(tabShortcutsBtn, t.tabShortcuts);
     updateTabLabel(tabThemeBtn, t.tabTheme);
     updateTabLabel(tabLangBtn, t.tabLang);
     updateTabLabel(tabBackupBtn, t.tabBackup);
 
-    const activeTabBtn = [tabHistoryBtn, tabEngineBtn, tabAliasBtn, tabAiBtn, tabShortcutsBtn, tabThemeBtn, tabLangBtn, tabBackupBtn].find(b => b && b.classList && typeof b.classList.contains === 'function' && b.classList.contains('active'));
+    const activeTabBtn = [tabHistoryBtn, tabAliasBtn, tabAiBtn, tabShortcutsBtn, tabThemeBtn, tabLangBtn, tabBackupBtn].find(b => b && b.classList && typeof b.classList.contains === 'function' && b.classList.contains('active'));
     if (modalActiveTabTitle && activeTabBtn) {
         const lbl = activeTabBtn.querySelector('.tab-label');
         modalActiveTabTitle.textContent = lbl ? lbl.textContent : activeTabBtn.textContent;
@@ -3239,19 +3232,6 @@ const tabSubtitles = {
         ar: "إدارة سجل البحث وسجلات الإكمال التلقائي المحلية",
         hi: "अपना खोज इतिहास और स्थानीय ऑटोकम्प्लीट रिकॉर्ड प्रबंधित करें"
     },
-    engine: {
-        en: "Choose your primary search provider or configure custom queries",
-        ru: "Выбор поисковой системы по умолчанию",
-        uz: "Birlamchi qidiruv tizimini tanlash",
-        es: "Elige tu motor de búsqueda principal",
-        pt: "Escolha o seu motor de pesquisa principal",
-        de: "Wählen Sie Ihre Standardsuchmaschine",
-        zh: "选择您的默认搜索引擎",
-        ja: "メインの検索エンジンを選択",
-        ko: "기본 검색엔진 선택",
-        ar: "اختر محرك البحث الافتراضي",
-        hi: "अपना डिफ़ॉल्ट सर्च इंजन चुनें"
-    },
     alias: {
         en: "Create custom keyword shortcuts for instantaneous URL redirection",
         ru: "Короткие ключевые слова для мгновенного перехода на сайты",
@@ -3334,10 +3314,9 @@ const tabSubtitles = {
 
 function getActiveTabKey(contentEl) {
     if (!contentEl) {
-        contentEl = [tabHistoryContent, tabEngineContent, tabAliasContent, tabAiContent, tabShortcutsContent, tabThemeContent, tabLangContent, tabBackupContent].find(c => c && c.classList && c.classList.contains('active'));
+        contentEl = [tabHistoryContent, tabAliasContent, tabAiContent, tabShortcutsContent, tabThemeContent, tabLangContent, tabBackupContent].find(c => c && c.classList && c.classList.contains('active'));
     }
     if (contentEl === tabHistoryContent) return 'history';
-    if (contentEl === tabEngineContent) return 'engine';
     if (contentEl === tabAliasContent) return 'alias';
     if (contentEl === tabAiContent) return 'ai';
     if (contentEl === tabShortcutsContent) return 'shortcuts';
@@ -3360,7 +3339,7 @@ function updateModalInfoBadge() {
     const lang = getLanguage();
     const t = Object.assign({}, translations.en, translations[lang]);
 
-    const activeContent = [tabHistoryContent, tabEngineContent, tabAliasContent, tabAiContent, tabShortcutsContent, tabThemeContent, tabLangContent, tabBackupContent].find(c => c && c.classList.contains('active'));
+    const activeContent = [tabHistoryContent, tabAliasContent, tabAiContent, tabShortcutsContent, tabThemeContent, tabLangContent, tabBackupContent].find(c => c && c.classList.contains('active'));
 
     if (activeContent === tabHistoryContent) {
         modalInfoBadge.style.display = 'inline-flex';
@@ -3387,7 +3366,7 @@ function openModal() {
     if (typeof renderThemeGallery === 'function') renderThemeGallery();
     applyTheme(getTheme());
 
-    const activeTabBtn = [tabHistoryBtn, tabEngineBtn, tabAliasBtn, tabAiBtn, tabShortcutsBtn, tabThemeBtn, tabLangBtn, tabBackupBtn].find(b => b && b.classList && typeof b.classList.contains === 'function' && b.classList.contains('active')) || tabHistoryBtn;
+    const activeTabBtn = [tabHistoryBtn, tabAliasBtn, tabAiBtn, tabShortcutsBtn, tabThemeBtn, tabLangBtn, tabBackupBtn].find(b => b && b.classList && typeof b.classList.contains === 'function' && b.classList.contains('active')) || tabHistoryBtn;
     if (activeTabBtn && typeof activeTabBtn.focus === 'function') {
         activeTabBtn.focus();
     }
@@ -3425,10 +3404,10 @@ if (settingsModal) {
 function switchTab(activeBtn, activeContent) {
     if (typeof stopRecording === 'function') stopRecording();
     if (typeof stopRecordingAlias === 'function') stopRecordingAlias();
-    [tabHistoryBtn, tabEngineBtn, tabAliasBtn, tabAiBtn, tabShortcutsBtn, tabThemeBtn, tabLangBtn, tabBackupBtn].forEach(btn => {
+    [tabHistoryBtn, tabAliasBtn, tabAiBtn, tabShortcutsBtn, tabThemeBtn, tabLangBtn, tabBackupBtn].forEach(btn => {
         if (btn) btn.classList.remove('active');
     });
-    [tabHistoryContent, tabEngineContent, tabAliasContent, tabAiContent, tabShortcutsContent, tabThemeContent, tabLangContent, tabBackupContent].forEach(content => {
+    [tabHistoryContent, tabAliasContent, tabAiContent, tabShortcutsContent, tabThemeContent, tabLangContent, tabBackupContent].forEach(content => {
         if (content) content.classList.remove('active');
     });
 
@@ -3463,7 +3442,6 @@ function switchTab(activeBtn, activeContent) {
 function switchTabByOffset(offset) {
     const tabPairs = [
         { btn: tabHistoryBtn, content: tabHistoryContent },
-        { btn: tabEngineBtn, content: tabEngineContent },
         { btn: tabAliasBtn, content: tabAliasContent },
         { btn: tabAiBtn, content: tabAiContent },
         { btn: tabShortcutsBtn, content: tabShortcutsContent },
@@ -3482,7 +3460,6 @@ function switchTabByOffset(offset) {
 }
 
 if (tabHistoryBtn) tabHistoryBtn.addEventListener('click', () => switchTab(tabHistoryBtn, tabHistoryContent));
-if (tabEngineBtn) tabEngineBtn.addEventListener('click', () => switchTab(tabEngineBtn, tabEngineContent));
 if (tabAliasBtn) tabAliasBtn.addEventListener('click', () => switchTab(tabAliasBtn, tabAliasContent));
 if (tabAiBtn) tabAiBtn.addEventListener('click', () => switchTab(tabAiBtn, tabAiContent));
 if (tabShortcutsBtn) tabShortcutsBtn.addEventListener('click', () => switchTab(tabShortcutsBtn, tabShortcutsContent));
@@ -3491,115 +3468,8 @@ if (tabLangBtn) tabLangBtn.addEventListener('click', () => switchTab(tabLangBtn,
 if (tabBackupBtn) tabBackupBtn.addEventListener('click', () => switchTab(tabBackupBtn, tabBackupContent));
 
 // ==========================================
-// 4b. Поисковые системы (Search Engines)
+// 4. Поиск в интернете (Chrome Search API)
 // ==========================================
-const SEARCH_ENGINE_KEY = 'app_search_engine';
-const DEFAULT_ENGINE = 'google';
-
-const SEARCH_ENGINES = {
-    google: {
-        id: 'google',
-        name: 'Google',
-        code: 'G',
-        domain: 'google.com',
-        searchUrl: 'https://www.google.com/search?q=',
-        action: 'https://www.google.com/search',
-        param: 'q'
-    },
-    duckduckgo: {
-        id: 'duckduckgo',
-        name: 'DuckDuckGo',
-        code: 'DDG',
-        domain: 'duckduckgo.com',
-        searchUrl: 'https://duckduckgo.com/?q=',
-        action: 'https://duckduckgo.com/',
-        param: 'q'
-    },
-    yandex: {
-        id: 'yandex',
-        name: 'Yandex',
-        code: 'Y',
-        domain: 'ya.ru',
-        searchUrl: 'https://ya.ru/search/?text=',
-        action: 'https://ya.ru/search/',
-        param: 'text'
-    },
-    bing: {
-        id: 'bing',
-        name: 'Bing',
-        code: 'B',
-        domain: 'bing.com',
-        searchUrl: 'https://www.bing.com/search?q=',
-        action: 'https://www.bing.com/search',
-        param: 'q'
-    },
-    brave: {
-        id: 'brave',
-        name: 'Brave',
-        code: 'BR',
-        domain: 'search.brave.com',
-        searchUrl: 'https://search.brave.com/search?q=',
-        action: 'https://search.brave.com/search',
-        param: 'q'
-    },
-    ecosia: {
-        id: 'ecosia',
-        name: 'Ecosia',
-        code: 'ECO',
-        domain: 'ecosia.org',
-        searchUrl: 'https://www.ecosia.org/search?q=',
-        action: 'https://www.ecosia.org/search',
-        param: 'q'
-    },
-    yahoo: {
-        id: 'yahoo',
-        name: 'Yahoo',
-        code: 'Y!',
-        domain: 'search.yahoo.com',
-        searchUrl: 'https://search.yahoo.com/search?p=',
-        action: 'https://search.yahoo.com/search',
-        param: 'p'
-    },
-    baidu: {
-        id: 'baidu',
-        name: 'Baidu',
-        code: 'BD',
-        domain: 'baidu.com',
-        searchUrl: 'https://www.baidu.com/s?wd=',
-        action: 'https://www.baidu.com/s',
-        param: 'wd'
-    }
-};
-
-function getSearchEngine() {
-    try {
-        const stored = localStorage.getItem(SEARCH_ENGINE_KEY);
-        if (stored && SEARCH_ENGINES[stored]) return stored;
-    } catch (e) {}
-    return DEFAULT_ENGINE;
-}
-
-function setSearchEngine(engineId) {
-    if (!SEARCH_ENGINES[engineId]) engineId = DEFAULT_ENGINE;
-    try {
-        localStorage.setItem(SEARCH_ENGINE_KEY, engineId);
-    } catch (e) {}
-
-    applySearchEngine(engineId);
-    renderSearchEngines();
-}
-
-function applySearchEngine(engineId) {
-    const engine = SEARCH_ENGINES[engineId] || SEARCH_ENGINES[DEFAULT_ENGINE];
-    if (form) {
-        form.action = engine.action;
-    }
-    if (input) {
-        input.name = engine.param;
-    }
-    updateSearchPlaceholder();
-}
-
 function updateSearchPlaceholder() {
     if (!input) return;
     const custom = (localStorage.getItem(CUSTOM_PLACEHOLDER_KEY) || '').trim();
@@ -3607,91 +3477,28 @@ function updateSearchPlaceholder() {
         input.placeholder = custom;
         return;
     }
-    const lang = getLanguage();
+    const lang = (typeof getLanguage === 'function') ? getLanguage() : 'en';
     const t = translations[lang] || translations.en;
-    const engineId = getSearchEngine();
-    const engine = SEARCH_ENGINES[engineId] || SEARCH_ENGINES.google;
-    const name = engine.name;
+    input.placeholder = (t && t.placeholder) || 'Search or type URL...';
+}
 
-    if (t && t.searchIn) {
-        input.placeholder = t.searchIn.replace('%s', name);
-    } else if (lang === 'ru') {
-        input.placeholder = `Поиск в ${name}...`;
-    } else if (lang === 'uz') {
-        input.placeholder = `${name}'da qidirish...`;
+function executeWebSearch(query) {
+    if (!query) return;
+    if (typeof chrome !== 'undefined' && chrome.search && typeof chrome.search.query === 'function') {
+        chrome.search.query({ text: query, disposition: 'CURRENT_TAB' });
     } else {
-        input.placeholder = `Search in ${name}...`;
+        // Fallback для браузерной разработки или превью
+        window.location.href = 'https://www.google.com/search?q=' + encodeURIComponent(query);
     }
 }
 
-function renderSearchEngines() {
-    if (!engineOptions) return;
-    const currentEngine = getSearchEngine();
+// Заглушки для обратной совместимости
+function applySearchEngine() { updateSearchPlaceholder(); }
+function renderSearchEngines() {}
+function getSearchEngine() { return 'default'; }
+function setSearchEngine() {}
 
-    const existingCards = engineOptions.querySelectorAll('.engine-card');
-    if (existingCards && existingCards.length > 0) {
-        existingCards.forEach(card => {
-            const isMatch = card.dataset && card.dataset.engine === currentEngine;
-            card.classList.toggle('active', !!isMatch);
-        });
-        return;
-    }
-
-    engineOptions.innerHTML = '';
-
-    Object.values(SEARCH_ENGINES).forEach(engine => {
-        const card = document.createElement('button');
-        card.type = 'button';
-        card.className = 'engine-card' + (engine.id === currentEngine ? ' active' : '');
-        card.setAttribute('data-engine', engine.id);
-        if (card.dataset) card.dataset.engine = engine.id;
-
-        const info = document.createElement('div');
-        info.className = 'engine-info';
-
-        const name = document.createElement('span');
-        name.className = 'engine-name';
-        name.textContent = engine.name;
-
-        const domain = document.createElement('span');
-        domain.className = 'engine-domain';
-        domain.textContent = engine.domain;
-
-        info.appendChild(name);
-        info.appendChild(domain);
-
-        const checkSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        checkSvg.setAttribute('class', 'engine-check');
-        checkSvg.setAttribute('viewBox', '0 0 24 24');
-        checkSvg.setAttribute('fill', 'none');
-        checkSvg.setAttribute('stroke', 'currentColor');
-        checkSvg.setAttribute('stroke-width', '2.2');
-        checkSvg.setAttribute('stroke-linecap', 'round');
-        checkSvg.setAttribute('stroke-linejoin', 'round');
-
-        const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-        polyline.setAttribute('points', '20 6 9 17 4 12');
-        checkSvg.appendChild(polyline);
-
-        card.appendChild(info);
-        card.appendChild(checkSvg);
-
-        card.addEventListener('click', () => {
-            setSearchEngine(engine.id);
-        });
-
-        engineOptions.appendChild(card);
-    });
-}
-
-if (btnResetEngine) {
-    btnResetEngine.addEventListener('click', () => {
-        setSearchEngine(DEFAULT_ENGINE);
-    });
-}
-
-applySearchEngine(getSearchEngine());
-renderSearchEngines();
+updateSearchPlaceholder();
 
 // ==========================================
 // 5. Управление историей поиска
@@ -3931,9 +3738,14 @@ function navigateToTarget(target) {
     } else if (target.includes('://')) {
         finalUrl = target;
     } else {
-        const engineId = typeof getSearchEngine === 'function' ? getSearchEngine() : DEFAULT_ENGINE;
-        const engine = (typeof SEARCH_ENGINES !== 'undefined' && SEARCH_ENGINES[engineId]) || { searchUrl: 'https://www.google.com/search?q=' };
-        finalUrl = engine.searchUrl + encodeURIComponent(target);
+        if (typeof chrome !== 'undefined' && chrome.search && typeof chrome.search.query === 'function') {
+        showAliasRedirectLoading(target, '');
+        setTimeout(() => {
+            executeWebSearch(target);
+        }, 220);
+        return;
+    }
+    finalUrl = 'https://www.google.com/search?q=' + encodeURIComponent(target);
     }
 
     showAliasRedirectLoading(target, finalUrl);
@@ -5169,7 +4981,7 @@ function isLeftmostItem(focusable, idx) {
 }
 
 function handleModalArrowNavigation(e) {
-    const sidebarTabs = [tabHistoryBtn, tabEngineBtn, tabAliasBtn, tabShortcutsBtn, tabThemeBtn, tabLangBtn].filter(Boolean);
+    const sidebarTabs = [tabHistoryBtn, tabAliasBtn, tabShortcutsBtn, tabThemeBtn, tabLangBtn].filter(Boolean);
     const isFocusInSidebar = sidebarTabs.includes(document.activeElement);
     const activeTabContent = settingsModal && typeof settingsModal.querySelector === 'function' ? settingsModal.querySelector('.tab-content.active') : null;
 
@@ -5628,9 +5440,7 @@ form.addEventListener('submit', (e) => {
         window.location.href = url;
     } else {
         e.preventDefault();
-        const engineId = getSearchEngine();
-        const engine = SEARCH_ENGINES[engineId] || SEARCH_ENGINES[DEFAULT_ENGINE];
-        window.location.href = engine.searchUrl + encodeURIComponent(query);
+        executeWebSearch(query);
     }
 });
 
