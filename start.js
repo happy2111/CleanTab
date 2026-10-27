@@ -1714,9 +1714,6 @@ function setLanguage(lang) {
     updateActiveTabSubtitle();
 
     if (labelShortcutHints) labelShortcutHints.textContent = t.shortcutHintsLabel;
-    if (engineTitle) engineTitle.textContent = t.engineTitle;
-    if (btnResetEngine) btnResetEngine.textContent = t.engineReset;
-
     if (btnClearHistory) btnClearHistory.textContent = t.historyClearAll;
     if (labelHistorySaving) labelHistorySaving.textContent = t.historySavingLabel;
     if (historyDescText) historyDescText.textContent = t.historyDesc;
