@@ -3524,12 +3524,26 @@ if (chkHistorySaving) {
     });
 }
 
+const MOCK_HISTORY = [
+    "how to build clean chrome extensions",
+    "minimalist workspaces aesthetic",
+    "github.com/happy2111/CleanTab",
+    "tailwind css flexbox cheat sheet",
+    "manifest v3 permissions guide",
+    "best fonts for code and terminals",
+    "react server components architecture",
+    "typescript satisfies operator"
+];
+
 function getHistory() {
     try {
-        return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
-    } catch (e) {
-        return [];
-    }
+        const stored = JSON.parse(localStorage.getItem(HISTORY_KEY));
+        if (Array.isArray(stored) && stored.length > 0) return stored;
+    } catch (e) {}
+    try {
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(MOCK_HISTORY));
+    } catch (e) {}
+    return [...MOCK_HISTORY];
 }
 
 function saveToHistory(query) {
@@ -6637,4 +6651,520 @@ if (!localStorage.getItem(ONBOARDING_KEY)) {
     setTimeout(() => {
         openWelcomeLangModal();
     }, 450);
+}
+
+// ==========================================
+// 15. Демонстрационный автоматический тур (Showcase Tour)
+// ==========================================
+const btnTourPlay = document.getElementById('btn-tour-play');
+const iconTourPlay = document.getElementById('icon-tour-play');
+const iconTourStop = document.getElementById('icon-tour-stop');
+let isTourActive = false;
+let tourAbortController = null;
+
+function tourSleep(ms, signal) {
+    return new Promise((resolve, reject) => {
+        const timer = setTimeout(resolve, ms);
+        if (signal) {
+            signal.addEventListener('abort', () => {
+                clearTimeout(timer);
+                reject(new DOMException('Tour Aborted', 'AbortError'));
+            }, { once: true });
+        }
+    });
+}
+
+async function tourType(targetInput, text, speed = 40, signal) {
+    if (!targetInput) return;
+    targetInput.focus();
+    for (let i = 0; i < text.length; i++) {
+        if (signal && signal.aborted) return;
+        targetInput.value = text.slice(0, i + 1);
+        targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+        await tourSleep(speed, signal);
+    }
+}
+
+async function tourBackspace(targetInput, count, speed = 20, signal) {
+    if (!targetInput) return;
+    targetInput.focus();
+    const initial = targetInput.value;
+    for (let i = 0; i < count; i++) {
+        if (signal && signal.aborted) return;
+        targetInput.value = initial.slice(0, Math.max(0, initial.length - (i + 1)));
+        targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+        await tourSleep(speed, signal);
+    }
+}
+
+async function startShowcaseTour() {
+    if (isTourActive) {
+        stopShowcaseTour();
+        return;
+    }
+
+    // Закрываем онбординг или приветственный экран, если открыты
+    if (typeof finishOnboarding === 'function') finishOnboarding();
+    const welcomeModal = document.getElementById('welcome-lang-modal');
+    if (welcomeModal) welcomeModal.style.display = 'none';
+
+    isTourActive = true;
+    tourAbortController = new AbortController();
+    const signal = tourAbortController.signal;
+
+    if (btnTourPlay) {
+        btnTourPlay.classList.add('active');
+        btnTourPlay.title = "Stop Showcase Tour";
+    }
+    if (iconTourPlay) iconTourPlay.style.display = 'none';
+    if (iconTourStop) iconTourStop.style.display = 'block';
+
+    const initialTheme = getTheme();
+    const initialLang = getLanguage();
+    const initialAliases = { ...getAliases() };
+    const initialAiServices = JSON.parse(JSON.stringify(getAiServices()));
+    const initialInputVal = input ? input.value : '';
+    const initialPinned = isSidebarPinned;
+    const initialBgImg = localStorage.getItem(BG_IMAGE_KEY);
+    const initialBgBlur = localStorage.getItem(BG_BLUR_KEY);
+    const initialFont = localStorage.getItem(FONT_KEY);
+    const initialCaret = localStorage.getItem(CARET_KEY);
+    const initialSidebarPos = localStorage.getItem(SIDEBAR_POS_KEY);
+    const initialSidebarBlur = localStorage.getItem(SIDEBAR_BLUR_KEY);
+    const initialSidebarOpacity = localStorage.getItem(SIDEBAR_OPACITY_KEY);
+    const initialSidebarBlurAmount = localStorage.getItem(SIDEBAR_BLUR_AMOUNT_KEY);
+    const initialAliasAnim = localStorage.getItem(ALIAS_ANIM_KEY);
+
+    try {
+        // Шаг 1: Интро / Приветствие — зритель сразу видит минималистичный интерфейс
+        if (input) {
+            input.focus();
+            input.value = '';
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            await tourSleep(350, signal);
+
+            await tourType(input, "CleanTab — minimalist, fast & distraction-free", 35, signal);
+            await tourSleep(850, signal);
+
+            await tourBackspace(input, 47, 18, signal);
+            await tourSleep(300, signal);
+        }
+
+        // Шаг 2: Настройки — вкладки History и Shortcuts
+        if (typeof openModal === 'function') {
+            openModal();
+            await tourSleep(650, signal);
+
+            // 1. Вкладка History (открыта по умолчанию)
+            if (tabHistoryBtn) {
+                tabHistoryBtn.click();
+                await tourSleep(750, signal);
+            }
+
+            // 2. Вкладка Shortcuts — список горячих клавиш
+            if (tabShortcutsBtn) {
+                tabShortcutsBtn.click();
+                await tourSleep(750, signal);
+            }
+
+            // 3. Вкладка Appearance — выбор тем Blue Horizon и Obsidian Ember
+            if (tabThemeBtn) {
+                tabThemeBtn.click();
+                await tourSleep(600, signal);
+
+                if (subtabGalleryBtn) {
+                    subtabGalleryBtn.click();
+                    await tourSleep(450, signal);
+                }
+
+                // Выбор темы 1: Blue Horizon
+                const blueCard = document.querySelector('.theme-card[data-theme-id="blue"]');
+                if (blueCard) {
+                    blueCard.click();
+                    await tourSleep(850, signal);
+                }
+
+                // Выход из настроек
+                closeModal();
+                await tourSleep(550, signal);
+
+                // Открытие боковой панели закладок (выезжает справа)
+                if (typeof openSidebar === 'function') {
+                    openSidebar();
+                    await tourSleep(700, signal);
+                }
+
+                // Написать что-то в поисковой строке
+                if (input) {
+                    input.focus();
+                    input.value = '';
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    await tourSleep(300, signal);
+                    await tourType(input, "ocean depths live stream 4k", 38, signal);
+                    await tourSleep(750, signal);
+                    await tourBackspace(input, 28, 20, signal);
+                    await tourSleep(300, signal);
+                }
+
+                // Закрытие боковой панели
+                if (typeof closeSidebar === 'function') {
+                    closeSidebar();
+                    await tourSleep(550, signal);
+                }
+
+                // Повторный вход в настройки -> Appearance
+                openModal();
+                await tourSleep(600, signal);
+                if (tabThemeBtn) {
+                    tabThemeBtn.click();
+                    await tourSleep(600, signal);
+                }
+
+                // Выбор темы 2: Obsidian Ember
+                const emberCard = document.querySelector('.theme-card[data-theme-id="dark-red"]');
+                if (emberCard) {
+                    emberCard.click();
+                    await tourSleep(850, signal);
+                }
+
+                // Выход из настроек
+                closeModal();
+                await tourSleep(550, signal);
+
+                // Открытие боковой панели закладок (выезжает СЛЕВА, так как у Obsidian Ember sidebar слева!)
+                if (typeof openSidebar === 'function') {
+                    openSidebar();
+                    await tourSleep(700, signal);
+                }
+
+                // Написать что-то в поисковой строке
+                if (input) {
+                    input.focus();
+                    input.value = '';
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    await tourSleep(300, signal);
+                    await tourType(input, "obsidian dark workspace setup", 38, signal);
+                    await tourSleep(750, signal);
+                    await tourBackspace(input, 30, 20, signal);
+                    await tourSleep(300, signal);
+                }
+
+                // Закрытие боковой панели
+                if (typeof closeSidebar === 'function') {
+                    closeSidebar();
+                    await tourSleep(550, signal);
+                }
+
+                // Повторный вход в настройки -> Appearance
+                openModal();
+                await tourSleep(600, signal);
+                if (tabThemeBtn) {
+                    tabThemeBtn.click();
+                    await tourSleep(600, signal);
+                }
+
+                // Показать вкладку Customizer ("Своя настройка") и плавно прокрутить вниз
+                const subtabCustom = document.getElementById('subtab-custom-btn');
+                if (subtabCustom) {
+                    subtabCustom.click();
+                    await tourSleep(650, signal);
+
+                    const modalBody = document.querySelector('.modal-body');
+                    if (modalBody) {
+                        modalBody.scrollTo({ top: 220, behavior: 'smooth' });
+                        await tourSleep(750, signal);
+                        modalBody.scrollTo({ top: 480, behavior: 'smooth' });
+                        await tourSleep(750, signal);
+                        modalBody.scrollTo({ top: 780, behavior: 'smooth' });
+                        await tourSleep(750, signal);
+                        modalBody.scrollTo({ top: modalBody.scrollHeight, behavior: 'smooth' });
+                        await tourSleep(950, signal);
+                        modalBody.scrollTo({ top: 0, behavior: 'smooth' });
+                        await tourSleep(650, signal);
+                    }
+                }
+            }
+
+            // 4. Вкладка Language — переключение языков
+            if (tabLangBtn) {
+                tabLangBtn.click();
+                await tourSleep(550, signal);
+                setLanguage('ru');
+                await tourSleep(600, signal);
+                setLanguage('en');
+                await tourSleep(600, signal);
+            }
+
+            // 5. Вкладка Quick Search — добавление новых алиасов live
+            if (tabAliasBtn) {
+                tabAliasBtn.click();
+                await tourSleep(600, signal);
+
+                if (aliasKeyInput && aliasUrlInput && aliasSubmitBtn) {
+                    // Новая переменная 1: v0 -> v0.dev
+                    await tourType(aliasKeyInput, "v0", 55, signal);
+                    await tourSleep(250, signal);
+                    await tourType(aliasUrlInput, "v0.dev", 45, signal);
+                    await tourSleep(350, signal);
+                    aliasSubmitBtn.click();
+                    await tourSleep(650, signal);
+
+                    // Новая переменная 2: doc -> devdocs.io
+                    await tourType(aliasKeyInput, "doc", 55, signal);
+                    await tourSleep(250, signal);
+                    await tourType(aliasUrlInput, "devdocs.io", 45, signal);
+                    await tourSleep(350, signal);
+                    aliasSubmitBtn.click();
+                    await tourSleep(750, signal);
+                }
+            }
+
+            // Выход из настроек
+            closeModal();
+            await tourSleep(500, signal);
+        }
+
+        // Шаг 3: Проверка в поиске — добавленные и стандартные алиасы
+        if (input) {
+            input.focus();
+            input.value = '';
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            await tourSleep(350, signal);
+
+            // 1. Только что добавленный: v0 -> v0.dev
+            await tourType(input, "v0", 65, signal);
+            await tourSleep(550, signal);
+            await tourBackspace(input, 2, 35, signal);
+            await tourSleep(220, signal);
+
+            // 2. gpt -> chatgpt.com
+            await tourType(input, "gpt", 65, signal);
+            await tourSleep(550, signal);
+            await tourBackspace(input, 3, 35, signal);
+            await tourSleep(220, signal);
+
+            // 3. yt -> youtube.com
+            await tourType(input, "yt", 65, signal);
+            await tourSleep(550, signal);
+            await tourBackspace(input, 2, 35, signal);
+            await tourSleep(220, signal);
+
+            // 4. l8080 -> localhost:8080
+            await tourType(input, "l8080", 60, signal);
+            await tourSleep(550, signal);
+            await tourBackspace(input, 5, 35, signal);
+            await tourSleep(220, signal);
+
+            // 5. gh -> github.com
+            await tourType(input, "gh", 65, signal);
+            await tourSleep(550, signal);
+            await tourBackspace(input, 2, 35, signal);
+            await tourSleep(300, signal);
+        }
+
+        // Шаг 4: Боковая панель закладок — структура и папки
+        if (typeof openSidebar === 'function') {
+            openSidebar();
+            await tourSleep(600, signal);
+
+            // Раскрыть все папки в дереве
+            if (ideaBtnExpand) {
+                ideaBtnExpand.click();
+                await tourSleep(700, signal);
+            }
+
+            // Плавный скролл по структуре папок
+            const sidebarContent = document.querySelector('.idea-sidebar-content');
+            if (sidebarContent) {
+                sidebarContent.scrollTo({ top: 130, behavior: 'smooth' });
+                await tourSleep(650, signal);
+                sidebarContent.scrollTo({ top: 250, behavior: 'smooth' });
+                await tourSleep(650, signal);
+                sidebarContent.scrollTo({ top: 0, behavior: 'smooth' });
+                await tourSleep(550, signal);
+            }
+
+            // Свернуть все папки
+            if (ideaBtnCollapse) {
+                ideaBtnCollapse.click();
+                await tourSleep(550, signal);
+            }
+
+            // Пин и открепление
+            if (ideaBtnPin) {
+                toggleSidebarPin();
+                await tourSleep(500, signal);
+                toggleSidebarPin();
+                await tourSleep(400, signal);
+            }
+
+            closeSidebar();
+            await tourSleep(550, signal);
+        }
+
+        // Шаг 5: Демонстрация верхних скрытых кнопок действий
+        const topActions = document.querySelector('.top-actions');
+        if (topActions) {
+            topActions.classList.add('showcase-visible');
+            await tourSleep(900, signal);
+            topActions.classList.remove('showcase-visible');
+            await tourSleep(350, signal);
+        }
+
+        // Шаг 6: AI фича — настройка ChatGPT (!ai) в edit, добавление Claude (!claude) и финальный поиск с редиректом
+        if (typeof openModal === 'function') {
+            openModal();
+            await tourSleep(650, signal);
+
+            // Переход на вкладку AI
+            if (tabAiBtn) {
+                tabAiBtn.click();
+                await tourSleep(750, signal);
+            }
+
+            // По умолчанию выбран !ai ChatGPT -> заходим в edit
+            const editAiBtn = document.querySelector('#ai-list .item-action-btn');
+            if (editAiBtn) {
+                editAiBtn.click();
+                await tourSleep(900, signal);
+            }
+
+            // Обратно выходим из edit
+            if (btnAiBack) {
+                btnAiBack.click();
+                await tourSleep(650, signal);
+            }
+
+            // Нажимаем добавить AI service
+            if (btnOpenAiForm) {
+                btnOpenAiForm.click();
+                await tourSleep(650, signal);
+            }
+
+            // Выбираем провайдер Claude
+            if (aiProviderSelect) {
+                aiProviderSelect.value = 'claude';
+                aiProviderSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                await tourSleep(450, signal);
+            }
+
+            // Пишем префикс !claude
+            if (aiPrefixInput) {
+                aiPrefixInput.value = '';
+                aiPrefixInput.dispatchEvent(new Event('input', { bubbles: true }));
+                await tourSleep(250, signal);
+                await tourType(aiPrefixInput, "!claude", 55, signal);
+                await tourSleep(450, signal);
+            }
+
+            // Нажимаем Add
+            if (aiSubmitBtn) {
+                aiSubmitBtn.click();
+                await tourSleep(850, signal);
+            }
+
+            // Выход из настроек
+            closeModal();
+            await tourSleep(600, signal);
+        }
+
+        // В главном поиске пишем !claude с двухстрочным промптом и делаем submit с редиректом
+        if (input) {
+            input.focus();
+            input.value = '';
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            await tourSleep(350, signal);
+
+            const claudePrompt = "!claude Build a real-time WebSocket dashboard\nwith interactive Canvas charts and dark mode";
+            await tourType(input, claudePrompt, 35, signal);
+            await tourSleep(1200, signal);
+
+            // Отправка формы — запускает анимацию перехода и редирект в Claude
+            if (form) {
+                form.dispatchEvent(new Event('submit', { cancelable: true }));
+            }
+        }
+
+    } catch (e) {
+        // Завершено пользователем или прервано
+    } finally {
+        if (!signal.aborted) {
+            // Если тур успешно завершился с переходом, браузер переходит по URL
+        } else {
+            // Восстановление всех исходных настроек при ручной отмене
+            if (typeof applyTheme === 'function') applyTheme(initialTheme);
+            if (typeof setLanguage === 'function') setLanguage(initialLang);
+            if (typeof saveAliases === 'function') {
+                saveAliases(initialAliases);
+                renderAliases();
+            }
+            if (typeof saveAiServices === 'function') {
+                saveAiServices(initialAiServices);
+                renderAiServices();
+            }
+            if (initialBgImg) {
+                localStorage.setItem(BG_IMAGE_KEY, initialBgImg);
+                localStorage.setItem(BG_BLUR_KEY, initialBgBlur);
+                applyBgImage(initialBgImg);
+                setBgBlur(initialBgBlur === 'true');
+            } else {
+                localStorage.removeItem(BG_IMAGE_KEY);
+                localStorage.removeItem(BG_BLUR_KEY);
+                applyBgImage(null);
+            }
+            if (initialFont) applyFont(initialFont);
+            if (initialCaret) setCaretStyle(initialCaret);
+            if (initialSidebarPos && typeof setSidebarPosition === 'function') {
+                setSidebarPosition(initialSidebarPos);
+            }
+            if (initialSidebarBlur !== null && typeof setSidebarBlur === 'function') {
+                setSidebarBlur(initialSidebarBlur === 'true');
+            }
+            if (initialSidebarOpacity !== null && typeof setSidebarOpacity === 'function') {
+                setSidebarOpacity(parseInt(initialSidebarOpacity, 10));
+            }
+            if (initialSidebarBlurAmount !== null && typeof setSidebarBlurAmount === 'function') {
+                setSidebarBlurAmount(parseInt(initialSidebarBlurAmount, 10));
+            }
+            if (initialAliasAnim && typeof setAliasAnimStyle === 'function') {
+                setAliasAnimStyle(initialAliasAnim);
+            }
+            if (input) {
+                input.value = initialInputVal;
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            if (isSidebarPinned !== initialPinned) {
+                isSidebarPinned = initialPinned;
+                try {
+                    localStorage.setItem('idea_sidebar_pinned', String(initialPinned));
+                } catch (e) {}
+                if (typeof updatePinVisual === 'function') updatePinVisual();
+            }
+            if (typeof closeSidebar === 'function') closeSidebar();
+            if (typeof closeModal === 'function') closeModal();
+        }
+
+        const topActions = document.querySelector('.top-actions');
+        if (topActions) topActions.classList.remove('showcase-visible');
+
+        isTourActive = false;
+        tourAbortController = null;
+        if (btnTourPlay) {
+            btnTourPlay.classList.remove('active');
+            btnTourPlay.title = "Run Feature Tour";
+        }
+        if (iconTourPlay) iconTourPlay.style.display = 'block';
+        if (iconTourStop) iconTourStop.style.display = 'none';
+        if (input) input.focus();
+    }
+}
+
+function stopShowcaseTour() {
+    if (tourAbortController) {
+        tourAbortController.abort();
+    }
+}
+
+if (btnTourPlay) {
+    btnTourPlay.addEventListener('click', startShowcaseTour);
 }
