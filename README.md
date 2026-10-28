@@ -2,7 +2,7 @@
 
 CleanTab is a lightweight, distraction-free new tab environment engineered for Chromium-based browsers. Built on Manifest V3 with zero external runtime dependencies, it prioritizes deterministic performance, privacy, and keyboard-driven ergonomics.
 
-![CleanTab Demonstration](demo.gif)
+[![CleanTab Demonstration](demo.gif)](demo.mp4)
 
 ## Abstract
 
