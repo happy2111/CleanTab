@@ -6728,7 +6728,7 @@ async function startShowcaseTour() {
     const initialBgImg = localStorage.getItem(BG_IMAGE_KEY);
     const initialBgBlur = localStorage.getItem(BG_BLUR_KEY);
     const initialFont = localStorage.getItem(FONT_KEY);
-    const initialCaret = localStorage.getItem(CARET_KEY);
+    const initialCaret = localStorage.getItem(CARET_STYLE_KEY);
     const initialSidebarPos = localStorage.getItem(SIDEBAR_POS_KEY);
     const initialSidebarBlur = localStorage.getItem(SIDEBAR_BLUR_KEY);
     const initialSidebarOpacity = localStorage.getItem(SIDEBAR_OPACITY_KEY);
